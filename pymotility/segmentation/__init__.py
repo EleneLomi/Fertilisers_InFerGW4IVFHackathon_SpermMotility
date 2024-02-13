@@ -1,4 +1,6 @@
-from .main import (
+"""This submodule segments videos to extract paths."""
+
+from .segment import (
     methods,
     segment,
     relight,
