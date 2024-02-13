@@ -2,8 +2,10 @@ import numpy as np
 from skvideo.io import vread, vwrite
 import cv2
 import os
+import matplotlib.pyplot as plt
+import time
 
-methods = ["lkof", "trex"]
+methods = ["lkof"]
 
 
 def relight(video):
@@ -14,6 +16,15 @@ def relight(video):
 def denoise(video):
     """Denoise the video."""
     pass
+
+
+def exclude_center_roi(width, height, N, M):
+    exclude_center_roi = np.ones((N, M), dtype=np.uint8)
+    exclude_center_roi[
+        N // 2 - width : N // 2 + width, M // 2 - height : M // 2 + height
+    ] = 0
+    exclude_center_roi = exclude_center_roi.astype(np.uint8)
+    return exclude_center_roi
 
 
 def extract_path(video, method="lkof", denoise=False, relight=False):
@@ -30,8 +41,6 @@ def extract_path(video, method="lkof", denoise=False, relight=False):
         video = denoise(video)
     if method == "lkof":
         path = lkof_extract_path(video)
-    elif method == "trex":
-        path = trex_extract_path(video)
     else:
         raise ValueError(f"Invalid method: {method}")
     return path
@@ -40,19 +49,39 @@ def extract_path(video, method="lkof", denoise=False, relight=False):
 def lkof_extract_path(video):
     """extract_path the video using the Lucas Kanade Optical Flow method."""
     T, N, M, _ = video.shape
-    # get the good points to track
+    ql = 0.2
+    path = np.zeros((T, 2))
+    tracked_paths = []
     old_gray = cv2.cvtColor(video[0], cv2.COLOR_BGR2GRAY)
+    ecr = exclude_center_roi(N // 10, N // 10, N, M)
     lk_params = dict(
         winSize=(15, 15),
         maxLevel=2,
         criteria=(cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 0.03),
     )
-    path = np.full((T, 2), (N // 2, M // 2))
-    return path
-
-
-def trex_extract_path(video):
-    """extract_path the video using the TREX method."""
-    T, N, M, _ = video.shape
-    path = np.full((T, 2), (N // 2, M // 2))
+    points = cv2.goodFeaturesToTrack(
+        old_gray, mask=ecr, maxCorners=100, qualityLevel=ql, minDistance=70
+    )
+    trajectories = np.zeros((T, points.shape[0], 2))
+    fig, ax = plt.subplots()
+    for i, frame in enumerate(video):
+        trajectories[i] = points.reshape(-1, 2)
+        frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        points, st, err = cv2.calcOpticalFlowPyrLK(
+            old_gray, frame_gray, points, None, **lk_params
+        )
+        points[st == 0] = np.nan
+        if np.sum(~np.isnan(points)) < 2:
+            new_points = cv2.goodFeaturesToTrack(
+                frame_gray,
+                mask=ecr,
+                maxCorners=100,
+                qualityLevel=ql,
+                minDistance=70,
+            )
+            points = np.vstack([points, new_points])
+            trajectories = np.concatenate(
+                [trajectories, np.nan * np.ones((T, new_points.shape[0], 2))],
+                axis=1,
+            )
     return path

@@ -6,6 +6,5 @@ from .extract_path import (
     relight,
     denoise,
     lkof_extract_path,
-    trex_extract_path,
 )
 from .visualise import plot_frame, animate_path
