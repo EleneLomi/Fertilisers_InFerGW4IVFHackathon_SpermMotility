@@ -1,0 +1,8 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pymotility"
+version = "0.1"
+dependencies = ["numpy", "scipy", "matplotlib", "scikit-image", "scikit-video", "opencv-python", "pytest"]
