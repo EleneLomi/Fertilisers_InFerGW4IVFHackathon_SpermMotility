@@ -5,17 +5,41 @@ import os
 import matplotlib.pyplot as plt
 import time
 
-methods = ["lkof"]
+methods = ["dof", "lkof"]
 
 
-def relight(video):
+def grayscale_video(video):
+    """Convert the video to greyscale."""
+    print("Converting video to greyscale")
+    out = video[..., 0].copy()
+    for i, frame in enumerate(video):
+        out[i] = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    print("Conversion complete")
+    return out
+
+
+def relight_video(video):
     """Relight the video using a uniform convolution."""
     pass
 
 
-def denoise(video):
-    """Denoise the video."""
-    pass
+def denoise_video(video):
+    """Denoise a greyscale video."""
+    print("Denoising video")
+    for i, frame in enumerate(video):
+        video[i] = cv2.fastNlMeansDenoising(
+            frame,
+            None,
+            templateWindowSize=7,
+            searchWindowSize=15,
+            h=1,
+        )
+        # cv2.imshow("frame", video[i])
+        # k = cv2.waitKey(30) & 0xFF
+        # if k == 27:
+        #     break
+    print("Denoising complete")
+    return video
 
 
 def exclude_center_roi(width, height, N, M):
@@ -27,7 +51,7 @@ def exclude_center_roi(width, height, N, M):
     return exclude_center_roi
 
 
-def extract_path(video, method="lkof", denoise=False, relight=False):
+def extract_path(video, method="dof", denoise=False, relight=False):
     """extract_path the video using the specified method."""
     if isinstance(video, list):
         return [
@@ -35,12 +59,15 @@ def extract_path(video, method="lkof", denoise=False, relight=False):
         ]
     if isinstance(video, str):
         video = vread(video)
+    video = grayscale_video(video)
     if relight:
-        video = relight(video)
+        video = relight_video(video)
     if denoise:
-        video = denoise(video)
+        video = denoise_video(video)
     if method == "lkof":
         path = lkof_extract_path(video)
+    if method == "dof":
+        path = dof_extract_path(video)
     else:
         raise ValueError(f"Invalid method: {method}")
     return path
@@ -48,7 +75,7 @@ def extract_path(video, method="lkof", denoise=False, relight=False):
 
 def lkof_extract_path(video):
     """extract_path the video using the Lucas Kanade Optical Flow method."""
-    T, N, M, _ = video.shape
+    T, N, M = video.shape
     ql = 0.2
     path = np.zeros((T, 2))
     tracked_paths = []
@@ -85,3 +112,25 @@ def lkof_extract_path(video):
                 axis=1,
             )
     return path
+
+
+def dof_extract_path(video):
+    """Extract path from the video using the Dense Optical Flow method."""
+    T, N, M = video.shape
+    last = video[0]
+    hsv = np.zeros((N, M, 3), dtype=np.float16)
+    hsv[..., 1] = 255
+    for i, frame in enumerate(video[1:]):
+        flow = cv2.calcOpticalFlowFarneback(
+            last, frame, None, 0.5, 3, 15, 3, 5, 1.2, 0
+        )
+        last = frame.copy()
+        mag, ang = cv2.cartToPolar(flow[..., 0], flow[..., 1])
+        hsv[..., 0] = ang * 180 / np.pi / 2
+        hsv[..., 2] = cv2.normalize(mag, None, 0, 255, cv2.NORM_MINMAX)
+        bgr = cv2.cvtColor(hsv.astype(int), cv2.COLOR_HSV2BGR)
+        cv2.imshow("frame2", bgr)
+        k = cv2.waitKey(30) & 0xFF
+        if k == 27:
+            break
+    return np.zeros((T, 2))

@@ -16,7 +16,7 @@ def test_path_extraction():
     videos = [vread(vid_name) for vid_name in vid_names]
     for method in pe.methods:
         os.mkdir(f"{output_dir}/{method}")
-        paths = pe.extract_path(videos, method=method)
+        paths = pe.extract_path(videos, method=method, denoise=False)
         for i, vid_name in enumerate(vid_names):
             name = vid_name.split("/")[-1].split(".")[0]
             np.save(f"{output_dir}/{method}/{name}.npy", paths[i])
