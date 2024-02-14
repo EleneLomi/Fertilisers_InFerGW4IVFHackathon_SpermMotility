@@ -6,7 +6,7 @@ def test_path_extraction():
     import matplotlib.pyplot as plt
     import numpy as np
 
-    root = "tests/data/simple_video"
+    root = "tests/data/videos"
     vid_names = [
         f"{root}/{name}" for name in os.listdir(root) if name.endswith(".mp4")
     ]
