@@ -6,7 +6,7 @@ import numpy as np
 
 
 if __name__ == "__main__":
-    root = "/Users/benn-m/Documents/ivf_hackathon/SpermDB/Sample1"
+    root = "/Users/benn-m/Documents/ivf_hackathon/SpermDB/Sample3"
     vid_names = [
         f"{root}/{name}" for name in os.listdir(root) if name.endswith(".mp4")
     ]
