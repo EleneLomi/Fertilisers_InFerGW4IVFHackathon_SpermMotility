@@ -34,10 +34,6 @@ def denoise_video(video):
             searchWindowSize=15,
             h=1,
         )
-        # cv2.imshow("frame", video[i])
-        # k = cv2.waitKey(30) & 0xFF
-        # if k == 27:
-        #     break
     print("Denoising complete")
     return video
 
@@ -114,7 +110,7 @@ def lkof_extract_path(video):
     return path
 
 
-def dof_extract_path(video, show=False, verbose=False):
+def dof_extract_path(video, verbose=True):
     """Extract path from the video using the Dense Optical Flow method."""
     T, N, M, _ = video.shape
     thetas = np.zeros(T - 1)
@@ -126,9 +122,9 @@ def dof_extract_path(video, show=False, verbose=False):
     hsv[..., 1] = 255
     last = cv2.cvtColor(last, cv2.COLOR_BGR2GRAY)
     if verbose:
-        print("Extracting ")
+        print("Extracting Path")
     for i, frame in enumerate(video[1:]):
-        if i % 10 == 0:
+        if i % 50 == 0 and verbose:
             print(f"Processing frame {i}/{T}")
         next = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         flow = cv2.calcOpticalFlowFarneback(
@@ -149,31 +145,8 @@ def dof_extract_path(video, show=False, verbose=False):
             path[i + 1] = path[i]
         else:
             thetas[i] = np.mean(ang[np.where(mask)])
-            # TODO delete the factor
-            dists[i] = np.mean(mag[np.where(mask)]) * 2
+            dists[i] = np.mean(mag[np.where(mask)])
             path[i + 1] = path[i] + dists[i] * np.array(
                 [np.cos(thetas[i]), np.sin(thetas[i])]
             )
-        if show:
-            hsv[..., 0] = ang * 180 / np.pi / 2
-            hsv[..., 2] = cv2.normalize(mag, None, 0, 255, cv2.NORM_MINMAX)
-            bgr = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
-            # draw an arrow representing the average direction of motion
-            x = M // 2
-            y = N // 2
-            u = int(-50 * dists[i] * np.cos(thetas[i]))
-            v = int(-50 * dists[i] * np.sin(thetas[i]))
-            cv2.arrowedLine(bgr, (x, y), (x + u, y + v), (0, 0, 255), 2)
-            # draw the path so far
-            for j in range(i):
-                point = (
-                    int(path[j, 0] - path[i, 0]),
-                    int(path[j, 1] - path[i, 1]),
-                )
-                point = (N // 2 - point[0], M // 2 - point[1])
-                cv2.circle(bgr, point, 3, (255, 0, 0))
-            cv2.imshow("frame2", bgr)
-            k = cv2.waitKey(30) & 0xFF
-            if k == 27:
-                break
     return path
