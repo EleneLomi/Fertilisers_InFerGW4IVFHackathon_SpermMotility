@@ -87,7 +87,7 @@ def lkof_extract_path(video):
         criteria=(cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 0.03),
     )
     points = cv2.goodFeaturesToTrack(
-        old_gray, mask=ecr, maxCorners=100, qualityLevel=ql, minDistance=70
+        old_gray, mask=ecr, maxCorners=2, qualityLevel=ql, minDistance=70
     )
     trajectories = np.zeros((T, points.shape[0], 2))
     fig, ax = plt.subplots()
