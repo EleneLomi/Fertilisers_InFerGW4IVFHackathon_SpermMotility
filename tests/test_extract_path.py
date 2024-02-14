@@ -16,12 +16,12 @@ def test_path_extraction():
     videos = [vread(vid_name) for vid_name in vid_names]
     for method in pe.methods:
         os.mkdir(f"{output_dir}/{method}")
-        paths = pe.extract_path(videos, method=method, denoise=False)
         for i, vid_name in enumerate(vid_names):
+            path = pe.extract_path(videos[i], method=method, denoise=False)
             name = vid_name.split("/")[-1].split(".")[0]
-            np.save(f"{output_dir}/{method}/{name}.npy", paths[i])
-            fig, ax = pe.plot_frame(-1, videos[i], paths[i])
-            plt.savefig(f"{output_dir}/{method}/{name}.png")
+            np.save(f"{output_dir}/{method}/{name}.npy", path)
+            anim = pe.animate_path(videos[i], path)
+            anim.save(f"{output_dir}/{method}/{name}.mp4")
 
 
 if __name__ == "__main__":

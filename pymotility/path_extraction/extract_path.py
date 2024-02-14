@@ -114,7 +114,7 @@ def lkof_extract_path(video):
     return path
 
 
-def dof_extract_path(video, show=True, save=None):
+def dof_extract_path(video, show=False, verbose=False):
     """Extract path from the video using the Dense Optical Flow method."""
     T, N, M, _ = video.shape
     thetas = np.zeros(T - 1)
@@ -125,7 +125,11 @@ def dof_extract_path(video, show=True, save=None):
     hsv = np.zeros_like(last)
     hsv[..., 1] = 255
     last = cv2.cvtColor(last, cv2.COLOR_BGR2GRAY)
+    if verbose:
+        print("Extracting ")
     for i, frame in enumerate(video[1:]):
+        if i % 10 == 0:
+            print(f"Processing frame {i}/{T}")
         next = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         flow = cv2.calcOpticalFlowFarneback(
             last, next, None, 0.5, 11, 15, 3, 5, 1.2, 0
@@ -136,7 +140,7 @@ def dof_extract_path(video, show=True, save=None):
         # remove not tracked background (bodge)
         mag_max = mag[np.where(ecr)].max()
         ret, thresh = cv2.threshold(
-            mag, mag_max / 3, mag_max, cv2.THRESH_BINARY
+            mag, 3 * mag_max / 4, mag_max, cv2.THRESH_BINARY
         )
         mask = ecr & thresh.astype(int)
         if np.unique(mask).size == 1:
@@ -145,8 +149,8 @@ def dof_extract_path(video, show=True, save=None):
             path[i + 1] = path[i]
         else:
             thetas[i] = np.mean(ang[np.where(mask)])
-            # TODO delete the factor of 10
-            dists[i] = np.mean(mag[np.where(mask)])
+            # TODO delete the factor
+            dists[i] = np.mean(mag[np.where(mask)]) * 2
             path[i + 1] = path[i] + dists[i] * np.array(
                 [np.cos(thetas[i]), np.sin(thetas[i])]
             )
