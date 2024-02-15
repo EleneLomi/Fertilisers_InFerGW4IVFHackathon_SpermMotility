@@ -127,7 +127,7 @@ def lkof_framewise_extract_path(video):
     path = np.zeros((T, 2))
     for i, frame in enumerate(video[1:]):
         ql = bql
-        while len(points) < 10:
+        while len(points) < 5:
             points = cv2.goodFeaturesToTrack(
                 old_gray,
                 mask=ecr,
@@ -145,14 +145,19 @@ def lkof_framewise_extract_path(video):
         diffs = diffs[st == 1]
         # remove outliers
         centered = diffs - np.median(diffs, axis=0)
-        inverse_covariance_matrix = la.inv(np.cov(centered.T))
+        try:
+            inverse_covariance_matrix = la.inv(np.cov(centered.T))
+        except la.LinAlgError:
+            # use ecuclidean distance if covariance matrix is singular
+            std = np.std(la.norm(centered, axis=0))
+            inverse_covariance_matrix = np.eye(2) / std**2
         mahalanobis = np.array(
             [
-                np.dot(dist, np.dot(inverse_covariance_matrix, dist))
+                np.sqrt(np.dot(dist, np.dot(inverse_covariance_matrix, dist)))
                 for dist in centered
             ]
         )
-        diffs = diffs[mahalanobis < 3]
+        diffs = diffs[mahalanobis < 2]
         if np.all(np.isnan(diffs)):
             path[i + 1] = path[i]
         else:
