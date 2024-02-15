@@ -1,11 +1,12 @@
 import numpy as np
+import numpy.linalg as la
 from skvideo.io import vread, vwrite
 import cv2
 import os
 import matplotlib.pyplot as plt
 import time
 
-methods = ["dof"]
+methods = ["lkof_framewise", "dof"]
 
 
 def grayscale_video(video):
@@ -62,7 +63,9 @@ def extract_path(video, method="dof", denoise=False, relight=False):
         video = denoise_video(video)
     if method == "lkof":
         path = lkof_extract_path(video)
-    if method == "dof":
+    elif method == "lkof_framewise":
+        path = lkof_framewise_extract_path(video)
+    elif method == "dof":
         path = dof_extract_path(video)
     else:
         raise ValueError(f"Invalid method: {method}")
@@ -107,6 +110,53 @@ def lkof_extract_path(video):
                 [trajectories, np.nan * np.ones((T, new_points.shape[0], 2))],
                 axis=1,
             )
+    return path
+
+
+def lkof_framewise_extract_path(video):
+    T, N, M, _ = video.shape
+    bql = 0.1
+    old_gray = cv2.cvtColor(video[0], cv2.COLOR_BGR2GRAY)
+    ecr = exclude_center_roi(N // 10, N // 10, N, M)
+    lk_params = dict(
+        winSize=(15, 15),
+        maxLevel=2,
+        criteria=(cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 0.03),
+    )
+    points = []
+    path = np.zeros((T, 2))
+    for i, frame in enumerate(video[1:]):
+        ql = bql
+        while len(points) < 10:
+            points = cv2.goodFeaturesToTrack(
+                old_gray,
+                mask=ecr,
+                maxCorners=100,
+                qualityLevel=ql,
+                minDistance=70,
+            )
+            ql *= 0.9
+        frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        new_points, st, err = cv2.calcOpticalFlowPyrLK(
+            old_gray, frame_gray, points, None, **lk_params
+        )
+        old_gray = frame_gray.copy()
+        diffs = new_points - points
+        diffs = diffs[st == 1]
+        # remove outliers
+        centered = diffs - np.median(diffs, axis=0)
+        inverse_covariance_matrix = la.inv(np.cov(centered.T))
+        mahalanobis = np.array(
+            [
+                np.dot(dist, np.dot(inverse_covariance_matrix, dist))
+                for dist in centered
+            ]
+        )
+        diffs = diffs[mahalanobis < 3]
+        if np.all(np.isnan(diffs)):
+            path[i + 1] = path[i]
+        else:
+            path[i + 1] = path[i] + np.mean(diffs, axis=0)
     return path
 
 
