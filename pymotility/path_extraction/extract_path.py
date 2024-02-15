@@ -51,9 +51,7 @@ def exclude_center_roi(width, height, N, M):
 def extract_path(video, method="dof", denoise=False, relight=False):
     """extract_path the video using the specified method."""
     if isinstance(video, list):
-        return [
-            extract_path(video, method, denoise, relight) for video in video
-        ]
+        return [extract_path(video, method, denoise, relight) for video in video]
     if isinstance(video, str):
         video = vread(video)
     # video = grayscale_video(video)
@@ -147,10 +145,7 @@ def lkof_framewise_extract_path(video):
         centered = diffs - np.median(diffs, axis=0)
         inverse_covariance_matrix = la.inv(np.cov(centered.T))
         mahalanobis = np.array(
-            [
-                np.dot(dist, np.dot(inverse_covariance_matrix, dist))
-                for dist in centered
-            ]
+            [np.dot(dist, np.dot(inverse_covariance_matrix, dist)) for dist in centered]
         )
         diffs = diffs[mahalanobis < 3]
         if np.all(np.isnan(diffs)):
@@ -177,17 +172,13 @@ def dof_extract_path(video, verbose=True):
         if i % 50 == 0 and verbose:
             print(f"Processing frame {i}/{T}")
         next = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        flow = cv2.calcOpticalFlowFarneback(
-            last, next, None, 0.5, 11, 15, 3, 5, 1.2, 0
-        )
+        flow = cv2.calcOpticalFlowFarneback(last, next, None, 0.5, 11, 15, 3, 5, 1.2, 0)
         last = next.copy()
         mag, ang = cv2.cartToPolar(flow[..., 0], flow[..., 1])
         ecr = exclude_center_roi(N // 10, N // 10, N, M)
         # remove not tracked background (bodge)
         mag_max = mag[np.where(ecr)].max()
-        ret, thresh = cv2.threshold(
-            mag, 3 * mag_max / 4, mag_max, cv2.THRESH_BINARY
-        )
+        ret, thresh = cv2.threshold(mag, 3 * mag_max / 4, mag_max, cv2.THRESH_BINARY)
         mask = ecr & thresh.astype(int)
         if np.unique(mask).size == 1:
             thetas[i] = 0

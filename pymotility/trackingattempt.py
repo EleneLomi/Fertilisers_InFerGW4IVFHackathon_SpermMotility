@@ -37,9 +37,7 @@ while True:
     ##  ROI_frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)[100:200,100:200]
 
     # Calculate optical flow using Lucas-Kanade method
-    p1, st, err = cv2.calcOpticalFlowPyrLK(
-        old_gray, frame_gray, p0, None, **lk_params
-    )
+    p1, st, err = cv2.calcOpticalFlowPyrLK(old_gray, frame_gray, p0, None, **lk_params)
 
     if (
         np.any(p1[:, 0, 0] <= 5)

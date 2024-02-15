@@ -7,9 +7,7 @@ import numpy as np
 
 if __name__ == "__main__":
     root = "/Users/benn-m/Documents/ivf_hackathon/SpermDB/Sample3"
-    vid_names = [
-        f"{root}/{name}" for name in os.listdir(root) if name.endswith(".mp4")
-    ]
+    vid_names = [f"{root}/{name}" for name in os.listdir(root) if name.endswith(".mp4")]
     current = datetime.now().strftime("%d-%m-%y_%H:%M:%S")
     output_dir = f"data/path_extraction/{current}"
     os.mkdir(output_dir)

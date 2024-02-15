@@ -7,9 +7,7 @@ def test_path_extraction():
     import numpy as np
 
     root = "tests/data/videos"
-    vid_names = [
-        f"{root}/{name}" for name in os.listdir(root) if name.endswith(".mp4")
-    ]
+    vid_names = [f"{root}/{name}" for name in os.listdir(root) if name.endswith(".mp4")]
     current = datetime.now().strftime("%d-%m-%y_%H:%M:%S")
     output_dir = f"tests/data/path_extraction/{current}"
     os.mkdir(output_dir)

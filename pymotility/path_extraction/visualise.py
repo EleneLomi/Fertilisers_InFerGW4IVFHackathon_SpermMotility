@@ -35,9 +35,7 @@ def animate_path(video, path):
         ax.plot(displaced_path[:i, 0], displaced_path[:i, 1], "r")
         ax.set(xlim=(0, M), ylim=(N, 0))
         ax.axis("off")
-        ax.quiver(
-            N // 2, M // 2, u, v, angles="xy", scale_units="xy", scale=10
-        )
+        ax.quiver(N // 2, M // 2, u, v, angles="xy", scale_units="xy", scale=10)
 
     anim = FuncAnimation(fig, update, frames=T - 1, interval=30, repeat=True)
     return anim
