@@ -114,16 +114,13 @@ def lkof_framewise_extract_path(video):
     points = []
     path = np.zeros((T, 2))
     for i, frame in enumerate(video[1:]):
-        ql = bql
-        while len(points) < 5:
-            points = cv2.goodFeaturesToTrack(
-                old_gray,
-                mask=ecr,
-                maxCorners=100,
-                qualityLevel=ql,
-                minDistance=70,
-            )
-            ql *= 0.9
+        points = cv2.goodFeaturesToTrack(
+            old_gray,
+            mask=ecr,
+            maxCorners=5,
+            qualityLevel=1e-2,
+            minDistance=50,
+        )
         frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         new_points, st, err = cv2.calcOpticalFlowPyrLK(old_gray, frame_gray, points, None, **lk_params)
         old_gray = frame_gray.copy()
