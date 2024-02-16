@@ -15,6 +15,7 @@ if __name__ == "__main__":
             vid_names.remove(f"{root}/{vid}.mp4")
         except ValueError:
             print(f"Could not remove {vid}.mp4")
+
     current = datetime.now().strftime("%d-%m-%y_%H:%M:%S")
     output_dir = f"data/path_extraction/{current}"
     os.mkdir(output_dir)
