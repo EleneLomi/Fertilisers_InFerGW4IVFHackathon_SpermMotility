@@ -21,19 +21,17 @@ def segment_paths(paths, overlap=1):
     return segmented_paths
 
 
-def segment_paths_to_given_length(paths, length):
-    segmented_paths = []
-    for path in paths:
-        if len(path) > length:
-            for i in range(0, len(path), length):
-                # Split paths longer than the given length
-                segmented_path = path[i : i + length]
-                if len(segmented_path) == length:
-                    segmented_paths.append(segmented_path)
-        else:
-            segmented_paths.append(path)  # Add the shortest paths as is
-
-    return segmented_paths
+def segment_path_to_given_length(path, length):
+    segmented_path = []
+    if len(path) > length:
+        for i in range(0, len(path), length + 1):
+            # Split paths longer than the given length
+            segment = path[i : i + length]
+            if len(segment) == length:
+                segmented_path.append(segment)
+    else:
+        segmented_path.append(path)  # Add the shortest paths as is
+    return segmented_path
 
 
 def recenter_paths(paths):
