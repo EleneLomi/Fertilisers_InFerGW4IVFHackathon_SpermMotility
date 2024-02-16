@@ -15,6 +15,7 @@ This repository is a group entry to "Fertility: In Vitro, In Silico, In Clinico"
   - [Motivation and Summary](#motivation-and-summary)
   - [Alogirithm and Implementation.](#alogirithm-and-implementation)
   - [Benchmarking](#benchmarking)
+    - [Accuracy Against Hand Tracked Videos](#accuracy-against-hand-tracked-videos)
 - [Path Analysis](#path-analysis)
 - [Team](#team)
 
@@ -34,7 +35,21 @@ The data provided for this challenge is pre-tracked videos from 2 sperm samples 
 - (Smoothing using kalman filter?)
 - Update the path 
 ## Benchmarking
-- Accuracy against hand tracked 
+### Accuracy Against Hand Tracked Videos
+
+<div>
+<div style="display:flex">
+  <div style="flex:50%; padding:10px;">
+    <img src="media/handtracked_1.png" alt="Figure 1" width="400">
+  </div>
+  <div style="flex:50%; padding:10px;">
+    <img src="media/handtracked_2.png" alt="Figure 2" width="400">
+  </div>
+</div>
+<div style="text-align:center">Figure 1: Caption</div>
+
+<!-- ![This is the caption\label{mylabel}](media/sample1_vid1_sperm3_id3_vs_handtracked.png)
+See figure \ref{mylabel}. -->
 - Performance
 
 # Path Analysis
