@@ -50,16 +50,40 @@ $$
 where $I_x$ and $I_y$ are the image derivatives, which can be seen by linearity and taylor expansion.
 The quality of a corner can be identified by the size of the minimum eigenvalue of $M$, namely
 $$R=\min(\lambda_1,\lambda_2).$$
-We choose the $k$ highest ranked corners using this metric for tracking. In practice this is implemented using ```cv2.goodFeaturesToTrack()``` with $k=5$.
-```
-for frame in video:
-  find the k best corner points using Shi-Tomasi corner detector
-  use the Lucas-Kanade method to solve for the local optical flow at each point
-  remove outliers using the mahalanobis distance
-  update the path
-```
-The Shi-Tomasi and Lukas-Kanade methods were implemented using OpenCV. 
+We choose the $k$ highest ranked corners using this metric for tracking. In practice this is implemented using ```cv2.goodFeaturesToTrack``` with $k=5$, and mask out the center to avoid tracking the sperm head.
 
+
+Once we have good features to track, we estimate the local optical flow using the Lucas-Kanade method. 
+This assumes that the flow is locally approximately constant which is valid for the moving background
+in this dataset. A window of points which we label $\mathbf{x}_i=(x_i,y_i)$ for $i \in 0,...n$ is taken around the tracked pixel. Imposing the optical flow condition at each point gives an overdetermined stystem
+$$I_x(\mathbf{x}_i) v_x+I_y(\mathbf{x}_i) v_y = - I_t(\mathbf{x}_i)$$
+where $I_x,I_y$ and $I_t$ are the image derivates with respect to $x,y$ and $t$ respectively. We can write this in matrix form as a least squares problem
+$$\mathbf{v}^*=\min_{\mathbf{v}}A\mathbf{v}-\mathbf{b}$$
+where 
+$$
+A=\left[\begin{array}{cc}
+I_x\left(\mathbf{x}_1\right) & I_y\left(\mathbf{x}_1\right) \\
+I_x\left(\mathbf{x}_2\right) & I_y\left(\mathbf{x}_2\right) \\
+\vdots & \vdots \\
+I_x\left(\mathbf{x}_n\right) & I_y\left(\mathbf{x}_n\right)
+\end{array}\right] \quad v=\left[\begin{array}{c}
+v_x \\
+v_y
+\end{array}\right] \quad b=\left[\begin{array}{c}
+-I_t\left(\mathbf{x}_1\right) \\
+-I_t\left(\mathbf{x}_2\right) \\
+\vdots \\
+-I_t\left(\mathbf{x}_n\right)
+\end{array}\right].
+$$
+Solving this problem gives us the Lucas-Kanade estimate of the local optical flow. In practice this is implemented using ```cv2.calcOpticalFlowPyrLK```.
+To avoid detecting other moving sperm, we remove outliers from the flow vectors. This is achieved using the mahalanobis distance, which is defined as 
+$$d_M(\mathbf{x},X)=\sqrt{(\mathbf{x}-\mathbf{\mu})S^{-1}(\mathbf{x}-\mathbf{\mu})}$$
+where $X$ is a proability distribution with mean $\mu$ and covariance matrix $S$. In practice we estimate this using the sample mean and covariance matrix. Sample points with a mahalanobis distance greater than 2
+are rejected.
+
+Finally, the optical flow is estimated using the mean of the remaining flow vectors, and the position of the background is incremented and stored in a vector.
+The full implementation can be found in ```pymotility/path_extraction/extract_path.py::lkof_framewise_extract_path```.
 ## Benchmarking
 ### Accuracy Against Hand Tracked Videos
 <div>
