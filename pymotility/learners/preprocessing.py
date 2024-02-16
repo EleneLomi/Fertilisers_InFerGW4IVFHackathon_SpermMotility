@@ -77,7 +77,6 @@ def rotate_path(path):
     # Rotate the path
     rotated_path = np.dot(rotation_matrix, centered_path)
 
-
     return rotated_path.T  # Transpose back to original shape [T, 2]
 
 
