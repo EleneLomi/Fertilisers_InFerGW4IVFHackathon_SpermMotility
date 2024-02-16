@@ -1,10 +1,8 @@
+import cv2
+import matplotlib.pyplot as plt
 import numpy as np
 import numpy.linalg as la
-from skvideo.io import vread, vwrite
-import cv2
-import os
-import matplotlib.pyplot as plt
-import time
+from skvideo.io import vread
 
 methods = ["lkof_framewise", "dof"]
 
@@ -21,7 +19,6 @@ def grayscale_video(video):
 
 def relight_video(video):
     """Relight the video using a uniform convolution."""
-    pass
 
 
 def denoise_video(video):
@@ -41,9 +38,7 @@ def denoise_video(video):
 
 def exclude_center_roi(width, height, N, M):
     exclude_center_roi = np.ones((N, M), dtype=np.uint8)
-    exclude_center_roi[
-        N // 2 - width : N // 2 + width, M // 2 - height : M // 2 + height
-    ] = 0
+    exclude_center_roi[N // 2 - width : N // 2 + width, M // 2 - height : M // 2 + height] = 0
     exclude_center_roi = exclude_center_roi.astype(np.uint8)
     return exclude_center_roi
 
@@ -75,7 +70,6 @@ def lkof_extract_path(video):
     T, N, M = video.shape
     ql = 0.2
     path = np.zeros((T, 2))
-    tracked_paths = []
     old_gray = cv2.cvtColor(video[0], cv2.COLOR_BGR2GRAY)
     ecr = exclude_center_roi(N // 10, N // 10, N, M)
     lk_params = dict(
@@ -83,17 +77,13 @@ def lkof_extract_path(video):
         maxLevel=2,
         criteria=(cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 0.03),
     )
-    points = cv2.goodFeaturesToTrack(
-        old_gray, mask=ecr, maxCorners=100, qualityLevel=ql, minDistance=70
-    )
+    points = cv2.goodFeaturesToTrack(old_gray, mask=ecr, maxCorners=100, qualityLevel=ql, minDistance=70)
     trajectories = np.zeros((T, points.shape[0], 2))
     fig, ax = plt.subplots()
     for i, frame in enumerate(video):
         trajectories[i] = points.reshape(-1, 2)
         frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        points, st, err = cv2.calcOpticalFlowPyrLK(
-            old_gray, frame_gray, points, None, **lk_params
-        )
+        points, st, err = cv2.calcOpticalFlowPyrLK(old_gray, frame_gray, points, None, **lk_params)
         points[st == 0] = np.nan
         if np.sum(~np.isnan(points)) < 2:
             new_points = cv2.goodFeaturesToTrack(
@@ -124,30 +114,28 @@ def lkof_framewise_extract_path(video):
     points = []
     path = np.zeros((T, 2))
     for i, frame in enumerate(video[1:]):
-        ql = bql
-        while len(points) < 10:
-            points = cv2.goodFeaturesToTrack(
-                old_gray,
-                mask=ecr,
-                maxCorners=100,
-                qualityLevel=ql,
-                minDistance=70,
-            )
-            ql *= 0.9
-        frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        new_points, st, err = cv2.calcOpticalFlowPyrLK(
-            old_gray, frame_gray, points, None, **lk_params
+        points = cv2.goodFeaturesToTrack(
+            old_gray,
+            mask=ecr,
+            maxCorners=5,
+            qualityLevel=1e-2,
+            minDistance=50,
         )
+        frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        new_points, st, err = cv2.calcOpticalFlowPyrLK(old_gray, frame_gray, points, None, **lk_params)
         old_gray = frame_gray.copy()
         diffs = new_points - points
         diffs = diffs[st == 1]
         # remove outliers
         centered = diffs - np.median(diffs, axis=0)
-        inverse_covariance_matrix = la.inv(np.cov(centered.T))
-        mahalanobis = np.array(
-            [np.dot(dist, np.dot(inverse_covariance_matrix, dist)) for dist in centered]
-        )
-        diffs = diffs[mahalanobis < 3]
+        try:
+            inverse_covariance_matrix = la.inv(np.cov(centered.T))
+        except la.LinAlgError:
+            # use ecuclidean distance if covariance matrix is singular
+            std = np.std(la.norm(centered, axis=0))
+            inverse_covariance_matrix = np.eye(2) / std**2
+        mahalanobis = np.array([np.sqrt(np.dot(dist, np.dot(inverse_covariance_matrix, dist))) for dist in centered])
+        diffs = diffs[mahalanobis < 2]
         if np.all(np.isnan(diffs)):
             path[i + 1] = path[i]
         else:
@@ -187,7 +175,5 @@ def dof_extract_path(video, verbose=True):
         else:
             thetas[i] = np.mean(ang[np.where(mask)])
             dists[i] = np.mean(mag[np.where(mask)])
-            path[i + 1] = path[i] + dists[i] * np.array(
-                [np.cos(thetas[i]), np.sin(thetas[i])]
-            )
+            path[i + 1] = path[i] + dists[i] * np.array([np.cos(thetas[i]), np.sin(thetas[i])])
     return path
