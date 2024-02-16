@@ -124,5 +124,6 @@ def compute_path_variables(path):
     lin = linearity_progressive_motility(path)
     wob = culvilinear_path_wobbling(path)
     str_a = average_path_straightness(path)
-    bcf = compute_bcf(path)
-    return [vcl, vsl, vap, lin, wob, str_a, bcf]
+    bcf = average_path_crossing_colvilinear_path(path)
+    mad = mean_angular_displacement(path)
+    return [vcl, vsl, vap, lin, wob, str_a, bcf, mad]

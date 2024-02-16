@@ -26,11 +26,15 @@ class MixtureOfExperts:
         self.length_paths = len(data_processed[0])
         data_processed = recenter_paths(data_processed)
         data_rotated = rotate_paths(data_processed)
-        data_final_point_on_x_axis = set_final_point_on_x_axis_path(data_rotated)
-        self.data_rotated = np.vstack([path[:, 0].reshape(-1, 1) for path in data_rotated])
+        data_final_point_on_x_axis = set_final_point_on_x_axis(data_rotated)
+        self.data_rotated = np.vstack(
+            [path[:, 0] for path in data_rotated]  # Selects only the first coordinate, keeping the shape as (T, 1)
+        )
         self.data_final_point_on_x_axis = data_final_point_on_x_axis
         self.compute_distance_matrix(data_processed)
-        self.variables = compute_paths_variables(data_processed)
+        variables = compute_paths_variables(data_processed)
+        variables = [np.array(path) for path in variables]
+        self.variables = variables
 
     def compute_distance_matrix(self, data):
         n_samples = len(data)
@@ -71,8 +75,8 @@ class MixtureOfExperts:
         for label in np.unique(labels_1):
             # Find the most common corresponding label in labels_2 and labels_3 for each label in labels_1
             idx = labels_1 == label
-            most_common_label_2 = mode(labels_2[idx])[0][0]
-            most_common_label_3 = mode(labels_3[idx])[0][0]
+            most_common_label_2 = mode(labels_2[idx])[0]
+            most_common_label_3 = mode(labels_3[idx])[0]
 
             # Assign the new labels
             new_labels_1[idx] = label
@@ -135,14 +139,14 @@ class MixtureOfExperts:
         label_3 = self.aligned_labels_3[label_3]
 
         # Return the most common label
-        return mode([label_1, label_2, label_3])[0][0]
+        return mode([label_1, label_2, label_3])[0]
 
     def predict(self, path):
         paths = segment_paths_to_given_length(path, self.length_paths)
         predictions = []
         for path in paths:
             predictions.append(self.predict_one_path(path))
-        return mode(predictions)[0][0]
+        return mode(predictions)[0]
 
     def detect_anomaly_single(self, new_path):
         # Preprocess the new path
@@ -186,7 +190,23 @@ class MixtureOfExperts:
         anomalies = []
         for path in new_paths:
             anomalies.append(self.detect_anomaly_single(path))
-        return mode(anomalies)[0][0]
+        return mode(anomalies)[0]
+
+    def info(self):
+        # print the centers of the clusters of model 2
+        centers = self.model_2.cluster_centers_
+        # vcl = culvilinear_velocity(path)
+        # vsl = straight_line_velocity(path)
+        # vap = average_line_velocity(path)
+        # lin = linearity_progressive_motility(path)
+        # wob = culvilinear_path_wobbling(path)
+        # str_a = average_path_straightness(path)
+        # bcf = average_path_crossing_colvilinear_path(path)
+        # mad = mean_angular_displacement(path)
+        for i in range(len(centers)):
+            print("Center Index Congruent Label: ", self.aligned_labels_2[i])
+            print("vcl: ", centers[i][0])
+            print("vsl: ", centers[i][1])
 
 
 if __name__ == "__main__":

@@ -57,7 +57,7 @@ def test_hand_tracked_paths():
             path = pe.extract_path(video, method=method, denoise=False)
             ht_path = load_hand_tracked_path(f"{csv_path}/{csv_names[i]}")
             # get the last non nan index in ht_path
-            last = np.where(np.isnan(ht_path[:, 0]))[0][0]
+            last = np.where(np.isnan(ht_path[:, 0]))[0]
             fig, ax = plt.subplots()
             ax.plot(path[:last, 0], path[:last, 1], label="Extracted")
             ax.plot(ht_path[:last, 0], ht_path[:last, 1], label="Hand Tracked")
