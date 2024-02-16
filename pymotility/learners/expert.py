@@ -11,7 +11,7 @@ from sklearn.cluster import KMeans
 from sklearn.metrics import pairwise_distances
 from sklearn_extra.cluster import KMedoids
 
-ROOT = pathlib.Path(__file__).resolve().parent.parent
+ROOT = pathlib.Path(__file__).resolve().parent.parent.parent
 
 
 class MixtureOfExperts:
