@@ -184,7 +184,7 @@ class MixtureOfExperts:
             #     global_constraint="sakoe_chiba", sakoe_chiba_radius=3,
             # )
             # distance_y = dtw(
-            #     path_segment[:, 1],
+            #     path_segment[:, 1],   
             #     self.data_final_point_on_x_axis[:, 1],
             #     global_constraint="sakoe_chiba", sakoe_chiba_radius=3,
             # )
