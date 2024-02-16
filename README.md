@@ -30,23 +30,19 @@ This repository is a group entry to "Fertility: In Vitro, In Silico, In Clinico"
 The data provided for this challenge is pre-tracked videos from 2 sperm samples moving in vitro. To analyse the motion of the sperm we first need to extract the path the sperm takes from the videos. To do this we use the Lucas-Kanade method to estimate the background movement velocity at several "corner" points, take the average velocity after removing outliers, and use the average velocity to build up a path. We went on to validate this method qualitatively using overlaid path animations and quantiatively against hand tracked data, and saw high accuracy. The method is performant, running ~ 1 frame per 0.6ms, and so could easily be adapted to run with a live video stream in real time. Although the real world applicability of this path extraction method in the IVF setting may be slightly limited as it seems likely the system that initally tracked the sperm would record the path data as well, it is plausible that the path data may be lost in a data wipe or hard to accesss in propeitary software and a method such as this one would become necessary. 
 ## Alogirithm and Implementation.
 To estimate the background velocity, we first have to choose good points in the image to track. This is achieved using the Shi-Tomasi corner detection alogorithm. Let $x,y$ decribe the coordinates of an abitrary pixel, $I(x,y)$ be the intensity of the pixel, and $w(x,y)$ be a weighting function. Corners are sharp maximisers of the following function: 
-$$
-E(u, v)=\sum_{x, y} \underbrace{w(x, y)}_{\text {weighting function }}[\underbrace{I(x+u, y+v)}_{\text {shifted intensity }}-\underbrace{I(x, y)}_{\text {intensity }}]^2
+$$E(u, v)=\sum_{x, y} \underbrace{w(x, y)}_{\text {weighting function }}[\underbrace{I(x+u, y+v)}_{\text {shifted intensity }}-\underbrace{I(x, y)}_{\text {intensity }}]^2
 
 \approx\left[\begin{array}{ll}
 u & v
 \end{array}\right] M\left[\begin{array}{l}
 u \\
 v
-\end{array}\right]
-$$
+\end{array}\right]$$
 where 
-$$
-M=\sum_{x, y} w(x, y)\left[\begin{array}{ll}
+$$M=\sum_{x, y} w(x, y)\left[\begin{array}{ll}
 I_x I_x & I_x I_y \\
 I_x I_y & I_y I_y
-\end{array}\right]
-$$
+\end{array}\right]$$
 where $I_x$ and $I_y$ are the image derivatives, which can be seen by linearity and taylor expansion.
 The quality of a corner can be identified by the size of the minimum eigenvalue of $M$, namely
 $$R=\min(\lambda_1,\lambda_2).$$
@@ -60,8 +56,7 @@ $$I_x(\mathbf{x}_i) v_x+I_y(\mathbf{x}_i) v_y = - I_t(\mathbf{x}_i)$$
 where $I_x,I_y$ and $I_t$ are the image derivates with respect to $x,y$ and $t$ respectively. We can write this in matrix form as a least squares problem
 $$\mathbf{v}^*=\min_{\mathbf{v}}A\mathbf{v}-\mathbf{b}$$
 where 
-$$
-A=\left[\begin{array}{cc}
+$$A=\left[\begin{array}{cc}
 I_x\left(\mathbf{x}_1\right) & I_y\left(\mathbf{x}_1\right) \\
 I_x\left(\mathbf{x}_2\right) & I_y\left(\mathbf{x}_2\right) \\
 \vdots & \vdots \\
@@ -74,8 +69,7 @@ v_y
 -I_t\left(\mathbf{x}_2\right) \\
 \vdots \\
 -I_t\left(\mathbf{x}_n\right)
-\end{array}\right].
-$$
+\end{array}\right].$$
 Solving this problem gives us the Lucas-Kanade estimate of the local optical flow. In practice this is implemented using ```cv2.calcOpticalFlowPyrLK```.
 To avoid detecting other moving sperm, we remove outliers from the flow vectors. This is achieved using the mahalanobis distance, which is defined as 
 $$d_M(\mathbf{x},X)=\sqrt{(\mathbf{x}-\mathbf{\mu})S^{-1}(\mathbf{x}-\mathbf{\mu})}$$
@@ -98,8 +92,7 @@ The full implementation can be found in ```pymotility/path_extraction/extract_pa
 <div style="text-align:center">Figure 1: Hand tracked paths vs lkof_framewise path extraction algorithm.</div>
 
 ### Performance
-
-
+On average for this dataset, 
 # Path Analysis
 
 # Team
