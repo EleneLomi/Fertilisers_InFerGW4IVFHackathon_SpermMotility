@@ -1,14 +1,14 @@
-from preprocessing import *
+import os
+
 import numpy as np
 from dtaidistance import dtw
+from preprocessing import *
 from scipy.cluster.hierarchy import dendrogram, linkage
 from scipy.spatial.distance import squareform
-from sklearn_extra.cluster import KMedoids
-from sklearn.cluster import AgglomerativeClustering, KMeans
-from sklearn.metrics import pairwise_distances
 from scipy.stats import mode
-import numpy as np
-import os
+from sklearn.cluster import KMeans
+from sklearn.metrics import pairwise_distances
+from sklearn_extra.cluster import KMedoids
 
 
 class MixtureOfExperts:
@@ -24,9 +24,7 @@ class MixtureOfExperts:
         data_processed = recenter_paths(data_processed)
         data_rotated = rotate_paths(data_processed)
         data_final_point_on_x_axis = set_final_point_on_x_axis_path(data_rotated)
-        self.data_rotated = np.vstack(
-            [path[:, 0].reshape(-1, 1) for path in data_rotated]
-        )
+        self.data_rotated = np.vstack([path[:, 0].reshape(-1, 1) for path in data_rotated])
         self.data_final_point_on_x_axis = data_final_point_on_x_axis
         self.compute_distance_matrix(data_processed)
         self.variables = compute_paths_variables(data_processed)
@@ -36,15 +34,9 @@ class MixtureOfExperts:
         self.dist_matrix = np.zeros((n_samples, n_samples))
         for i in range(n_samples):
             for j in range(i + 1, n_samples):
-                distance_x = dtw.distance_fast(
-                    data[i][:, 0], data[j][:, 0], use_pruning=True
-                )
-                distance_y = dtw.distance_fast(
-                    data[i][:, 1], data[j][:, 1], use_pruning=True
-                )
-                self.dist_matrix[i, j] = self.dist_matrix[j, i] = (
-                    distance_x + distance_y
-                )
+                distance_x = dtw.distance_fast(data[i][:, 0], data[j][:, 0], use_pruning=True)
+                distance_y = dtw.distance_fast(data[i][:, 1], data[j][:, 1], use_pruning=True)
+                self.dist_matrix[i, j] = self.dist_matrix[j, i] = distance_x + distance_y
 
     def initialize_models(self):
         self.model_1 = KMedoids(n_clusters=3, random_state=0)
@@ -66,7 +58,7 @@ class MixtureOfExperts:
 
         # Assuming all models are trained on the same dataset, we can try to align the labels
         # by finding the most common label mapping between them
-        all_labels = np.vstack([labels_1, labels_2, labels_3])
+        np.vstack([labels_1, labels_2, labels_3])
 
         # Initialize new labels arrays to store the aligned labels
         new_labels_1 = np.empty_like(labels_1)
@@ -158,18 +150,12 @@ class MixtureOfExperts:
 
         medoid_distances = []
         for memoid in self.model_1.cluster_centers_:
-            distance_x = dtw.distance_fast(
-                new_path_processed[0][:, 0], memoid[:, 0], use_pruning=True
-            )
-            distance_y = dtw.distance_fast(
-                new_path_processed[0][:, 1], memoid[:, 1], use_pruning=True
-            )
+            distance_x = dtw.distance_fast(new_path_processed[0][:, 0], memoid[:, 0], use_pruning=True)
+            distance_y = dtw.distance_fast(new_path_processed[0][:, 1], memoid[:, 1], use_pruning=True)
             medoid_distances.append(distance_x + distance_y)
 
         distance_1 = np.min(medoid_distances)
-        distances_2 = np.min(
-            pairwise_distances([self.variables], self.model_2.cluster_centers_), axis=1
-        )
+        distances_2 = np.min(pairwise_distances([self.variables], self.model_2.cluster_centers_), axis=1)
         distances_3 = np.min(
             pairwise_distances([new_path_processed], self.model_3.cluster_centers_),
             axis=1,

@@ -28,10 +28,7 @@ def smooth_path(line):
 
 # VAP
 def average_line_velocity(path, smoothing_window=5):
-    smoothed_path = [
-        smooth_path(path[i : i + smoothing_window])
-        for i in range(0, len(path) - smoothing_window)
-    ]
+    smoothed_path = [smooth_path(path[i : i + smoothing_window]) for i in range(0, len(path) - smoothing_window)]
     # turn into np.array
     smoothed_path = np.array(smoothed_path)
     return straight_line_velocity(smoothed_path)

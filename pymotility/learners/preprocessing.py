@@ -1,5 +1,5 @@
-from motility import *
 import numpy as np
+from motility import *
 
 
 def segment_paths(paths, overlap=1):
