@@ -27,17 +27,40 @@ This repository is a group entry to "Fertility: In Vitro, In Silico, In Clinico"
 
 # Path Extraction
 ## Motivation and Summary
-The data provided for this challenge is pre-tracked videos from 2 sperm samples moving in vitro. To analyse the motion of the sperm we first need to extract the path the sperm takes from the videos. To do this we use the Lucas-Kanade method to estimate the background movement velocity at several "corner" points, take the average velocity after removing outliers, and use the average velocity to build up a path. We went on to validate this method qualitatively using overlaid path animations and quantiatively against hand tracked data, and saw high accuracy. The method is performant, running ~ 1 frame per 0.1ms, and so could easily be adapted to run with a live video stream in real time. Although the real world applicability of this path extraction method in the IVF setting may be slightly limited as it seems likely the system that initally tracked the sperm would record the path data as well, it is plausible that the path data may be lost in a data wipe or hard to accesss in propeitary software and a method such as this one would become necessary. 
+The data provided for this challenge is pre-tracked videos from 2 sperm samples moving in vitro. To analyse the motion of the sperm we first need to extract the path the sperm takes from the videos. To do this we use the Lucas-Kanade method to estimate the background movement velocity at several "corner" points, take the average velocity after removing outliers, and use the average velocity to build up a path. We went on to validate this method qualitatively using overlaid path animations and quantiatively against hand tracked data, and saw high accuracy. The method is performant, running ~ 1 frame per 0.6ms, and so could easily be adapted to run with a live video stream in real time. Although the real world applicability of this path extraction method in the IVF setting may be slightly limited as it seems likely the system that initally tracked the sperm would record the path data as well, it is plausible that the path data may be lost in a data wipe or hard to accesss in propeitary software and a method such as this one would become necessary. 
 ## Alogirithm and Implementation.
+To estimate the background velocity, we first have to choose good points in the image to track. This is achieved using the Shi-Tomasi corner detection alogorithm. Let $x,y$ decribe the coordinates of an abitrary pixel, $I(x,y)$ be the intensity of the pixel, and $w(x,y)$ be a weighting function. Corners are sharp maximisers of the following function: 
+$$E(u, v)=\sum_{x, y} \underbrace{w(x, y)}_{\text {weighting function }}[\underbrace{I(x+u, y+v)}_{\text {shifted intensity }}-\underbrace{I(x, y)}_{\text {intensity }}]^2 \approx\left[\begin{array}{ll} u & v \end{array}\right] M\left[\begin{array}{l} u \\ v \end{array}\right]$$
+where 
+$$M=\sum_{x, y} w(x, y)\left[\begin{array}{ll} I_x I_x & I_x I_y \\ I_x I_y & I_y I_y \end{array}\right]$$
+where $I_x$ and $I_y$ are the image derivatives, which can be seen by linearity and taylor expansion.
+The quality of a corner can be identified by the size of the minimum eigenvalue of $M$, namely
+$$R=\min(\lambda_1,\lambda_2).$$
+We choose the $k$ highest ranked corners using this metric for tracking. In practice this is implemented using ```cv2.goodFeaturesToTrack``` with $k=5$, and mask out the center to avoid tracking the sperm head.
 
-- Every iteration choose good points to track using Shi-Tomasi corner detector, excluding points in the center.
-- Use Lucas-Kanade method to estimate the local optical flow at a number of points 
-- Remove outliers using the mahalanobis distance
-- Average the remaining flow vectors
-- Update the path 
+
+Once we have good features to track, we estimate the local optical flow using the Lucas-Kanade method. 
+This assumes that the flow is locally approximately constant which is valid for the moving background
+in this dataset. A window of points which we label $\mathbf{x}_i=(x_i,y_i)$ for $i \in 0,...n$ is taken around the tracked pixel. Imposing the optical flow condition at each point gives an overdetermined stystem
+$$I_x(\mathbf{x}_i) v_x+I_y(\mathbf{x}_i) v_y = - I_t(\mathbf{x}_i)$$
+where $I_x,I_y$ and $I_t$ are the image derivates with respect to $x,y$ and $t$ respectively. We can write this in matrix form as a least squares problem
+$$\mathbf{v}^*=\min_{\mathbf{v}}A\mathbf{v}-\mathbf{b}$$
+where 
+$$A=\left[\begin{array}{cc} I_x\left(\mathbf{x}_1\right) & I_y\left(\mathbf{x}_1\right) \\ I_x\left(\mathbf{x}_2\right) & I_y\left(\mathbf{x}_2\right) \\ \vdots & \vdots \\ I_x\left(\mathbf{x}_n\right) & I_y\left(\mathbf{x}_n\right) \end{array}\right] \quad v=\left[\begin{array}{c} v_x \\ v_y \end{array}\right] \quad b=\left[\begin{array}{c} -I_t\left(\mathbf{x}_1\right) \\ -I_t\left(\mathbf{x}_2\right) \\ \vdots \\ -I_t\left(\mathbf{x}_n\right) \end{array}\right].$$
+Solving this problem gives us the Lucas-Kanade estimate of the local optical flow. In practice this is implemented using ```cv2.calcOpticalFlowPyrLK```.
+To avoid detecting other moving sperm, we remove outliers from the flow vectors. This is achieved using the mahalanobis distance, which is defined as 
+$$d_M(\mathbf{x},X)=\sqrt{(\mathbf{x}-\mathbf{\mu})S^{-1}(\mathbf{x}-\mathbf{\mu})}$$
+where $X$ is a proability distribution with mean $\mu$ and covariance matrix $S$. In practice we estimate this using the sample mean and covariance matrix. Sample points with a mahalanobis distance greater than 2
+are rejected.
+
+Finally, the optical flow is estimated using the mean of the remaining flow vectors, and the position of the background is incremented and stored in a vector.
+The full implementation can be found in ```pymotility/path_extraction/extract_path.py::lkof_framewise_extract_path```.
 ## Benchmarking
-### Accuracy Against Hand Tracked Videos
 
+https://github.com/EleneLomi/Fertilisers/assets/79370760/84bf0ab1-017f-44d1-8931-62ccfc0ceeb7
+
+
+### Accuracy Against Hand Tracked Videos
 <div>
 <div style="display:flex">
   <div style="flex:50%; padding:10px;">
@@ -49,11 +72,8 @@ The data provided for this challenge is pre-tracked videos from 2 sperm samples 
 </div>
 <div style="text-align:center">Figure 1: Hand tracked paths vs lkof_framewise path extraction algorithm.</div>
 
-<!-- ![This is the caption\label{mylabel}](media/sample1_vid1_sperm3_id3_vs_handtracked.png)
-See figure \ref{mylabel}. -->
 ### Performance
-
-
+On average for this dataset, 
 # Path Analysis
 
 # Team

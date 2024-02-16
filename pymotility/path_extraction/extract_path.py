@@ -127,7 +127,7 @@ def lkof_framewise_extract_path(video):
         diffs = new_points - points
         diffs = diffs[st == 1]
         # remove outliers
-        centered = diffs - np.median(diffs, axis=0)
+        centered = diffs - np.mean(diffs, axis=0)
         try:
             inverse_covariance_matrix = la.inv(np.cov(centered.T))
         except la.LinAlgError:
