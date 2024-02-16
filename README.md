@@ -56,6 +56,10 @@ are rejected.
 Finally, the optical flow is estimated using the mean of the remaining flow vectors, and the position of the background is incremented and stored in a vector.
 The full implementation can be found in ```pymotility/path_extraction/extract_path.py::lkof_framewise_extract_path```.
 ## Benchmarking
+
+https://github.com/EleneLomi/Fertilisers/assets/79370760/84bf0ab1-017f-44d1-8931-62ccfc0ceeb7
+
+
 ### Accuracy Against Hand Tracked Videos
 <div>
 <div style="display:flex">
