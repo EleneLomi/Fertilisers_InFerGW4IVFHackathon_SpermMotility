@@ -61,7 +61,9 @@ class MixtureOfExperts:
                 )
 
     def initialize_models(self, num_clusters):
-        self.model_1 = KMedoids(n_clusters=num_clusters, random_state=0, metric='precomputed')
+        self.model_1 = KMedoids(
+            n_clusters=num_clusters, random_state=0, metric="precomputed"
+        )
         self.model_2 = KMeans(n_clusters=num_clusters, random_state=0)
         self.model_3 = KMeans(n_clusters=num_clusters, random_state=0)
 
@@ -144,8 +146,7 @@ class MixtureOfExperts:
             variables = np.array(compute_path_variables(path_segment))
             medoids = self.model_1.medoid_indices_
             centers_model_1 = [self.data_final_point_on_x_axis[i] for i in medoids]
-            
-        
+
             minimal_distance = float("inf")
             label_1 = -1
 
@@ -184,7 +185,6 @@ class MixtureOfExperts:
         return mode(flattened_predictions)[0]
 
     def detect_anomaly(self, new_path, threshold=120):
-
         segmented_paths = segment_path_to_given_length(new_path, self.length_paths)
         segmented_paths = recenter_paths(segmented_paths)
         segmented_paths = rotate_paths(segmented_paths)
@@ -193,14 +193,12 @@ class MixtureOfExperts:
         is_anomalous = []
 
         for path_segment in segmented_paths:
-            
             anomaly_count = 0
 
             variables = np.array(compute_path_variables(path_segment))
             medoids = self.model_1.medoid_indices_
             centers_model_1 = [self.data_final_point_on_x_axis[i] for i in medoids]
-            
-        
+
             minimal_distance = float("inf")
 
             for i in range(len(centers_model_1)):
@@ -223,25 +221,23 @@ class MixtureOfExperts:
             if minimal_distance > threshold:
                 anomaly_count += 1
 
-
             # get distance from the closest cluster center
             distance_2 = np.min(self.model_2.transform(variables.reshape(1, -1)))
             if distance_2 > threshold:
                 anomaly_count += 1
 
-            distance_3 = np.min(self.model_3.transform(path_segment[:, 0].reshape(1, -1)))
+            distance_3 = np.min(
+                self.model_3.transform(path_segment[:, 0].reshape(1, -1))
+            )
             if distance_3 > threshold:
                 anomaly_count += 1
-    
+
             if anomaly_count > 1:
                 is_anomalous.append(1)
             else:
                 is_anomalous.append(0)
-        
+
         return mode(is_anomalous)[0]
-
-
-
 
     def info(self):
         # print the centers of the clusters of model 2
@@ -261,8 +257,8 @@ class MixtureOfExperts:
 
 
 if __name__ == "__main__":
-        #  load all the files in "../../data/sample_1_paths/"
-        #  and store them in the list "data"
+    #  load all the files in "../../data/sample_1_paths/"
+    #  and store them in the list "data"
     data = []
     # for each file in the directory
     for filename in os.listdir("../../data/path_extraction/sample_1_paths/dof/"):
