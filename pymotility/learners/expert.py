@@ -1,4 +1,5 @@
 import os
+import pathlib
 
 import numpy as np
 from dtaidistance import dtw
@@ -9,6 +10,8 @@ from scipy.stats import mode
 from sklearn.cluster import KMeans
 from sklearn.metrics import pairwise_distances
 from sklearn_extra.cluster import KMedoids
+
+ROOT = pathlib.Path(__file__).resolve().parent.parent
 
 
 class MixtureOfExperts:
@@ -191,9 +194,9 @@ if __name__ == "__main__":
     #  and store them in the list "data"
     data = []
     # for each file in the directory
-    for filename in os.listdir("../../data/path_extraction/sample_1_paths/dof/"):
+    for filename in os.listdir(ROOT / "data/path_extraction/sample_1_paths/dof/"):
         # load the file
-        path = np.load("../../data/path_extraction/sample_1_paths/dof/" + filename)
+        path = np.load(ROOT / "data/path_extraction/sample_1_paths/dof" / filename)
         # append the path to the data list
         data.append(path)
 

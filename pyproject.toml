@@ -6,11 +6,14 @@ build-backend = "hatchling.build"
 name = "pymotility"
 version = "0.1"
 dependencies = [
-  "numpy<1.23",
+  "numpy",
   "scipy",
   "matplotlib",
   "scikit-image",
   "scikit-video",
+  "scikit-learn",
+  "scikit-learn-extra",
+  "dtaidistance",
   "opencv-python",
   "pandas",
   "pytest",
