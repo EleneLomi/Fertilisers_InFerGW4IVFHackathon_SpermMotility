@@ -1,10 +1,12 @@
-import pymotility.path_extraction as pe
-from skvideo.io import vread
 import os
 from datetime import datetime
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from skvideo.io import vread
+
+import pymotility.path_extraction as pe
 
 plt.style.use("ggplot")
 
@@ -13,7 +15,7 @@ def load_hand_tracked_path(name):
     x_data = np.array(pd.read_csv(name))[:, 1::2]
     y_data = np.array(pd.read_csv(name))[:, 2::2]
     T = x_data.shape[0]
-    n_objects = x_data.shape[1]
+    x_data.shape[1]
     diffs = np.ones((T, 2)) * np.nan
     diffs[0, :] = [0, 0]
     for i in range(1, T - 1):
@@ -25,9 +27,7 @@ def load_hand_tracked_path(name):
 
 def test_path_extraction():
     root = "tests/data/videos"
-    vid_names = [
-        f"{root}/{name}" for name in os.listdir(root) if name.endswith(".mp4")
-    ]
+    vid_names = [f"{root}/{name}" for name in os.listdir(root) if name.endswith(".mp4")]
     current = datetime.now().strftime("%d-%m-%y_%H:%M:%S")
     output_dir = f"tests/data/path_extraction/{current}"
     os.mkdir(output_dir)
@@ -45,9 +45,7 @@ def test_path_extraction():
 def test_hand_tracked_paths():
     vid_path = "tests/data/videos"
     csv_path = "tests/data/tracked_videos"
-    csv_names = [
-        name for name in os.listdir(csv_path) if name.endswith(".csv")
-    ]
+    csv_names = [name for name in os.listdir(csv_path) if name.endswith(".csv")]
     vid_names = [f"{vid_path}/{name.split('.')[0]}.mp4" for name in csv_names]
     current = datetime.now().strftime("%d-%m-%y_%H:%M:%S")
     output_dir = f"tests/data/path_extraction/{current}"
@@ -67,12 +65,8 @@ def test_hand_tracked_paths():
             avg_error = np.mean(error)
             # add legend containing the average error
             ax.legend(title=f"Average Error: {avg_error:.2f}")
-            ax.set(
-                title=f"Method: {method}. Video: {vid_name.split('/')[-1].split('.')[0]}"
-            )
-            plt.savefig(
-                f"{output_dir}/{method}/{csv_names[i].split('.')[0]}.png"
-            )
+            ax.set(title=f"Method: {method}. Video: {vid_name.split('/')[-1].split('.')[0]}")
+            plt.savefig(f"{output_dir}/{method}/{csv_names[i].split('.')[0]}.png")
 
 
 if __name__ == "__main__":

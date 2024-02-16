@@ -1,7 +1,6 @@
 import matplotlib.pyplot as plt
-from matplotlib.animation import FuncAnimation
 import numpy as np
-import cv2
+from matplotlib.animation import FuncAnimation
 
 
 def plot_frame(i, video, path, figax=None):
@@ -18,8 +17,8 @@ def plot_frame(i, video, path, figax=None):
 def animate_path(video, path):
     print("Animating path")
     T, M, N, _ = video.shape
-    x = M // 2
-    y = N // 2
+    M // 2
+    N // 2
     dists = np.linalg.norm(path[1:] - path[:-1], axis=1)
     thetas = np.arctan2(path[1:, 1] - path[:-1, 1], path[1:, 0] - path[:-1, 0])
     fig, ax = plt.subplots()
@@ -35,9 +34,7 @@ def animate_path(video, path):
         ax.plot(displaced_path[:i, 0], displaced_path[:i, 1], "r")
         ax.set(xlim=(0, M), ylim=(N, 0))
         ax.axis("off")
-        ax.quiver(
-            N // 2, M // 2, u, v, angles="xy", scale_units="xy", scale=10
-        )
+        ax.quiver(N // 2, M // 2, u, v, angles="xy", scale_units="xy", scale=10)
 
     anim = FuncAnimation(fig, update, frames=T - 1, interval=30, repeat=True)
     return anim

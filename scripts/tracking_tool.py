@@ -1,6 +1,4 @@
-import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.widgets import Button
 from skvideo.io import vread
 
 # path = "tests/data/simple_video/sample1_vid1_sperm14_id17.mp4"

@@ -1,15 +1,14 @@
 import os
 from datetime import datetime
-import pymotility.path_extraction as pe
-from skvideo.io import vread
-import numpy as np
 
+import numpy as np
+from skvideo.io import vread
+
+import pymotility.path_extraction as pe
 
 if __name__ == "__main__":
     root = "/Users/benn-m/Documents/ivf_hackathon/SpermDB/Sample1"
-    vid_names = [
-        f"{root}/{name}" for name in os.listdir(root) if name.endswith(".mp4")
-    ]
+    vid_names = [f"{root}/{name}" for name in os.listdir(root) if name.endswith(".mp4")]
     ommit = []
     for vid in ommit:
         try:

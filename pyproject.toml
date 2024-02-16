@@ -27,5 +27,5 @@ line-length = 120
 
 [tool.ruff]
 line-length = 120
-select = ["I001"]
+lint.select = ["I001"]
 exclude = [".git", "**/__pycache__"]

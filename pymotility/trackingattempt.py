@@ -19,9 +19,7 @@ lk_params = dict(
 ret, old_frame = cap.read()
 old_gray = cv2.cvtColor(old_frame, cv2.COLOR_BGR2GRAY)
 
-p0 = cv2.goodFeaturesToTrack(
-    old_gray, maxCorners=2, qualityLevel=0.05, minDistance=40, blockSize=7
-)
+p0 = cv2.goodFeaturesToTrack(old_gray, maxCorners=2, qualityLevel=0.05, minDistance=40, blockSize=7)
 
 # Create a mask for drawing purposes
 mask = np.zeros_like(old_frame)
@@ -37,9 +35,7 @@ while True:
     ##  ROI_frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)[100:200,100:200]
 
     # Calculate optical flow using Lucas-Kanade method
-    p1, st, err = cv2.calcOpticalFlowPyrLK(
-        old_gray, frame_gray, p0, None, **lk_params
-    )
+    p1, st, err = cv2.calcOpticalFlowPyrLK(old_gray, frame_gray, p0, None, **lk_params)
 
     if (
         np.any(p1[:, 0, 0] <= 5)

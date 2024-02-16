@@ -1,6 +1,6 @@
 # Fertilisers
-This repository is a group entry to "Fertility: In Vitro, In Silico, In Clinico" hackathon.
 
+This repository is a group entry to "Fertility: In Vitro, In Silico, In Clinico" hackathon.
 
 ## <span style="color:blue">GOAL: We need to choose the project.</span>
 
@@ -16,6 +16,7 @@ This repository is a group entry to "Fertility: In Vitro, In Silico, In Clinico"
 - [Team](#team)
 
 ---
+
 # Introduction
 
 # Background
