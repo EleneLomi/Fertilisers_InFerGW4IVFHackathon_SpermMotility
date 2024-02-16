@@ -1,0 +1,91 @@
+Data loaded
+Expert created
+Expert trained
+Center Index Congruent Label:  1
+vcl:  1.1533068338505743
+vsl:  0.5817308225635153
+vap:  0.5869685642557572
+lin:  0.502399569327344
+wob:  0.5077071047360233
+str_a:  0.502399569327344
+bcf:  0.21499430801756383
+mad:  0.3153901049055194
+
+
+Center Index Congruent Label:  3
+vcl:  2.619807517529541
+vsl:  2.2141501989892225
+vap:  2.2702631783150573
+lin:  0.8612821334557734
+wob:  0.8797586674563385
+str_a:  0.8612821334557734
+bcf:  0.20797413793103448
+mad:  -1.0586498062172998
+
+
+Center Index Congruent Label:  2
+vcl:  2.2118870706410214
+vsl:  1.831724451074591
+vap:  1.8695575361112708
+lin:  0.8381864041525047
+wob:  0.8537526664560435
+str_a:  0.8381864041525047
+bcf:  0.21962992759452937
+mad:  1.201305394710124
+
+
+Center Index Congruent Label:  0
+vcl:  1.6542916537137347
+vsl:  1.1861126611941628
+vap:  1.2224685920250962
+lin:  0.7459445175442062
+wob:  0.7660517469747946
+str_a:  0.7459445175442062
+bcf:  0.20871589292641923
+mad:  -0.6405039745229623
+
+
+Testing data loaded
+For test sample 1 at sample3_vid10_sperm3_id3.npy, prediction: 3, anomaly: 0   
+For test sample 2 at sample3_vid4_sperm4_id4.npy, prediction: 3, anomaly: 0   
+For test sample 3 at sample1_vid2_sperm5_id5.npy, prediction: 1, anomaly: 0   
+For test sample 4 at sample3_vid1_sperm7_id362.npy, prediction: 3, anomaly: 0   
+For test sample 5 at sample3_vid5_sperm3_id256.npy, prediction: 2, anomaly: 0   
+For test sample 6 at sample3_vid10_sperm7_id8.npy, prediction: 2, anomaly: 0   
+For test sample 7 at sample1_vid1_sperm24_id137.npy, prediction: 1, anomaly: 0   
+For test sample 8 at sample1_vid5_sperm10_id10.npy, prediction: 1, anomaly: 0   
+For test sample 9 at sample3_vid2_sperm5_id5.npy, prediction: 1, anomaly: 0   
+For test sample 10 at sample3_vid2_sperm26_id210.npy, prediction: 3, anomaly: 0   
+For test sample 11 at sample1_vid1_sperm10_id11.npy, prediction: 1, anomaly: 0   
+For test sample 12 at sample3_vid7_sperm6_id7.npy, prediction: 1, anomaly: 0   
+For test sample 13 at sample1_vid2_sperm26_id75.npy, prediction: 1, anomaly: 0   
+For test sample 14 at sample3_vid10_sperm16_id31.npy, prediction: 1, anomaly: 0   
+For test sample 15 at sample1_vid2_sperm24_id68.npy, prediction: 3, anomaly: 0   
+For test sample 16 at sample3_vid6_sperm12_id14.npy, prediction: 3, anomaly: 0   
+For test sample 17 at sample3_vid9_sperm16_id149.npy, prediction: 3, anomaly: 1   
+For test sample 18 at sample3_vid7_sperm14_id39.npy, prediction: 3, anomaly: 0   
+For test sample 19 at sample3_vid7_sperm9_id69.npy, prediction: 3, anomaly: 0   
+For test sample 20 at sample1_vid3_sperm2_id2.npy, prediction: 1, anomaly: 0   
+For test sample 21 at sample3_vid1_sperm23_id366.npy, prediction: 1, anomaly: 0   
+For test sample 22 at sample3_vid1_sperm15_id409.npy, prediction: 3, anomaly: 0   
+For test sample 23 at sample3_vid1_sperm12_id444.npy, prediction: 3, anomaly: 0   
+For test sample 24 at sample1_vid5_sperm15_id70.npy, prediction: 1, anomaly: 0   
+For test sample 25 at sample3_vid7_sperm21_id345.npy, prediction: 1, anomaly: 0   
+For test sample 26 at sample1_vid2_sperm27_id108.npy, prediction: 1, anomaly: 0   
+For test sample 27 at sample1_vid2_sperm16_id16.npy, prediction: 1, anomaly: 0   
+For test sample 28 at sample3_vid6_sperm8_id10.npy, prediction: 3, anomaly: 0   
+For test sample 29 at sample1_vid8_sperm24_id131.npy, prediction: 1, anomaly: 0   
+For test sample 30 at sample3_vid9_sperm22_id76.npy, prediction: 1, anomaly: 0   
+For test sample 31 at sample1_vid1_sperm3_id3.npy, prediction: 1, anomaly: 0   
+For test sample 32 at sample3_vid10_sperm37_id269.npy, prediction: 1, anomaly: 0   
+For test sample 33 at sample1_vid1_sperm29_id261.npy, prediction: 1, anomaly: 0   
+For test sample 34 at sample1_vid4_sperm1_id1.npy, prediction: 0, anomaly: 0   
+For test sample 35 at sample3_vid2_sperm13_id81.npy, prediction: 3, anomaly: 0   
+For test sample 36 at sample3_vid3_sperm26_id37.npy, prediction: 3, anomaly: 0   
+For test sample 37 at sample1_vid3_sperm14_id47.npy, prediction: 1, anomaly: 0   
+For test sample 38 at sample3_vid10_sperm15_id26.npy, prediction: 3, anomaly: 0   
+For test sample 39 at sample1_vid2_sperm14_id31.npy, prediction: 3, anomaly: 0   
+For test sample 40 at sample1_vid4_sperm24_id105.npy, prediction: 1, anomaly: 0   
+For test sample 41 at sample3_vid9_sperm9_id179.npy, prediction: 3, anomaly: 0   
+For test sample 42 at sample3_vid9_sperm32_id305.npy, prediction: 3, anomaly: 0   
+Testing done

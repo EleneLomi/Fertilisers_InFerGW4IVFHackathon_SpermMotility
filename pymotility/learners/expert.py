@@ -15,13 +15,13 @@ import numpy as np
 
 
 class MixtureOfExperts:
-    def __init__(self, data, debug=False, num_clusters=3):
+    def __init__(self, data, debug=False, num_clusters=3, load_from_file=False):
         self.data = data
         self.debug = debug
-        self.preprocess(debug)
+        self.preprocess(debug, load_from_file=load_from_file)
         self.initialize_models(num_clusters)
 
-    def preprocess(self, debug):
+    def preprocess(self, debug, load_from_file=False):
         # Assuming segment_paths, recenter_paths, rotate_paths, and set_final_point_on_x_axis_path are defined
         data_processed = segment_paths(self.data)
         self.length_paths = len(data_processed[0])
@@ -29,12 +29,16 @@ class MixtureOfExperts:
         data_rotated = rotate_paths(data_processed)
         data_final_point_on_x_axis = set_final_point_on_x_axis(data_rotated)
         self.data_rotated = np.vstack(
-            [
-                path[:, 0] for path in data_rotated
-            ]  # Selects only the first coordinate, keeping the shape as (T, 1)
+            [path[:, 0] for path in data_rotated]  # Selects only the first coordinate, keeping the shape as (T, 1)
         )
         self.data_final_point_on_x_axis = data_final_point_on_x_axis
-        self.compute_distance_matrix(data_processed)
+        if load_from_file:
+            self.dist_matrix = np.loadtxt("distance_matrix.txt")
+        else:
+            self.compute_distance_matrix(data_processed)
+            np.savetxt("distance_matrix.txt", self.dist_matrix, fmt="%d")
+        # store distance matrix in a txt file
+        # np.savetxt("distance_matrix.txt", self.dist_matrix, fmt="%d")
         variables = compute_paths_variables(data_processed)
         variables = [np.array(path) for path in variables]
         self.variables = variables
@@ -43,6 +47,8 @@ class MixtureOfExperts:
         n_samples = len(data)
         self.dist_matrix = np.zeros((n_samples, n_samples))
         for i in range(n_samples):
+            if i % 100 == 0:
+                print(f"Computing distance matrix: {i}/{n_samples}")
             for j in range(i + 1, n_samples):
                 distance_x = dtw(
                     data[i][:, 0],
@@ -56,14 +62,10 @@ class MixtureOfExperts:
                     global_constraint="sakoe_chiba",
                     sakoe_chiba_radius=3,
                 )
-                self.dist_matrix[i, j] = self.dist_matrix[j, i] = (
-                    distance_x + distance_y
-                )
+                self.dist_matrix[i, j] = self.dist_matrix[j, i] = distance_x + distance_y
 
     def initialize_models(self, num_clusters):
-        self.model_1 = KMedoids(
-            n_clusters=num_clusters, random_state=0, metric="precomputed"
-        )
+        self.model_1 = KMedoids(n_clusters=num_clusters, random_state=0, metric="precomputed")
         self.model_2 = KMeans(n_clusters=num_clusters, random_state=0)
         self.model_3 = KMeans(n_clusters=num_clusters, random_state=0)
 
@@ -83,9 +85,7 @@ class MixtureOfExperts:
         labels = [self.model_1.labels_, self.model_2.labels_, self.model_3.labels_]
 
         # Generate all permutations of the labels for 3 clusters
-        label_permutations = list(
-            permutations(range(len(self.model_2.cluster_centers_)))
-        )
+        label_permutations = list(permutations(range(len(self.model_2.cluster_centers_))))
 
         # Initialize variables to track the minimum cross-entropy and best permutations
         min_cross_entropy = float("inf")
@@ -226,9 +226,7 @@ class MixtureOfExperts:
             if distance_2 > threshold:
                 anomaly_count += 1
 
-            distance_3 = np.min(
-                self.model_3.transform(path_segment[:, 0].reshape(1, -1))
-            )
+            distance_3 = np.min(self.model_3.transform(path_segment[:, 0].reshape(1, -1)))
             if distance_3 > threshold:
                 anomaly_count += 1
 
@@ -254,6 +252,13 @@ class MixtureOfExperts:
             print("Center Index Congruent Label: ", self.aligned_labels_2[i])
             print("vcl: ", centers[i][0])
             print("vsl: ", centers[i][1])
+            print("vap: ", centers[i][2])
+            print("lin: ", centers[i][3])
+            print("wob: ", centers[i][4])
+            print("str_a: ", centers[i][5])
+            print("bcf: ", centers[i][6])
+            print("mad: ", centers[i][7])
+            print("\n")
 
 
 if __name__ == "__main__":
@@ -261,16 +266,34 @@ if __name__ == "__main__":
     #  and store them in the list "data"
     data = []
     # for each file in the directory
-    for filename in os.listdir("../../data/path_extraction/sample_1_paths/dof/"):
+    for filename in os.listdir("../../data/training_data/train/"):
         # load the file
-        path = np.load("../../data/path_extraction/sample_1_paths/dof/" + filename)
+        path = np.load("../../data/training_data/train/" + filename)
         # append the path to the data list
         data.append(path)
 
-    expert = MixtureOfExperts(data, debug=False, num_clusters=4)
+    print("Data loaded")
+    expert = MixtureOfExperts(data, debug=False, num_clusters=4, load_from_file=True)
+    print("Expert created")
     expert.train()
+    print("Expert trained")
     expert.info()
 
-    # try infering data[1]
-    print(expert.predict(data[1]))
-    print(expert.detect_anomaly(data[1], threshold=120))
+    data = []
+    filenames = []
+    for filename in os.listdir("../../data/training_data/test/"):
+        # load the file
+        path = np.load("../../data/training_data/test/" + filename)
+        # append the path to the data list
+        data.append(path)
+        filenames.append(filename)
+
+    print("Testing data loaded")
+
+    i = 0
+    for path in data:
+        i += 1
+        prediction = expert.predict(path)
+        anomaly = expert.detect_anomaly(path, threshold=50)
+        print(f"For test sample {i} at {filenames[i - 1]}, prediction: {prediction}, anomaly: {anomaly}   ")
+    print("Testing done")

@@ -124,4 +124,7 @@ def compute_path_variables(path):
     str_a = average_path_straightness(path)
     bcf = average_path_crossing_colvilinear_path(path)
     mad = mean_angular_displacement(path)
-    return [vcl, vsl, vap, lin, wob, str_a, bcf, mad]
+    ret = [vcl, vsl, vap, lin, wob, str_a, bcf, mad]
+    if np.any(np.isnan(ret)):
+        ret = [0 for i in range(8)]
+    return ret

@@ -1,0 +1,43 @@
+﻿Video name,label,Abnormal,Decsription 
+sample1_vid1_sperm3_id3,p,,
+sample1_vid2_sperm5_id5,np,yes,moves very slowly
+sample1_vid1_sperm24_id137,np,yes,moves very slowly
+sample1_vid2_sperm14_id31,p,,
+sample1_vid3_sperm2_id2,np,yes,moves very slowly
+sample1_vid1_sperm10_id11,np,yes,slow movement 
+sample1_vid1_sperm29_id261,np,yes,very slow movement
+sample1_vid2_sperm16_id16,np,yes,very slow movement
+sample1_vid2_sperm24_id68,p,,
+sample1_vid2_sperm26_id75,np,yes,very slow but some tail movement
+sample1_vid3_sperm14_id47,p,,progressive but on the slower side
+sample1_vid4_sperm1_id1,p,,progressive but on the slower side
+sample1_vid4_sperm24_id105,np,yes,slow but tail movement present 
+sample1_vid5_sperm10_id10,np,yes,
+sample1_vid5_sperm15_id70,np,yes,
+sample1_vid2_sperm16_id16,np,yes,little movement
+sample1_vid8_sperm24_id131,np,yes,
+sample3_vid1_sperm15_id409,p,,
+sample3_vid1_sperm7_id362,p,yes,Progressive but switches direction a lot
+sample3_vid2_sperm26_id210,p,,
+sample3_vid4_sperm4_id4,p,yes,Sperm head oriented incorrectly and motion seems to be circular
+sample3_vid5_sperm3_id256,p,,Swimming in a straight line
+sample3_vid6_sperm8_id10,p,yes,Unusual head orientation
+sample3_vid7_sperm6_id7,np,yes,Slow sperm (note another sperm centred towards the end of the video)
+sample3_vid7_sperm21_id345,np,yes,
+sample3_vid10_sperm15_id26,p,,
+sample3_vid10_sperm16_id31,np,yes,slow but still moves 
+sample3_vid9_sperm16_id149,p,,
+sample3_vid9_sperm22_id76,np,yes,"Unusual trajectory, keeps turning around"
+sample3_vid9_sperm9_id179,p,,
+sample3_vid6_sperm12_id14,p,yes,"moves in random directions, keeps turning around"
+sample3_vid10_sperm37_id269,np,yes,
+sample3_vid1_sperm12_id444,p,,
+sample3_vid1_sperm23_id366,np,yes,tail moving but no speed
+sample3_vid7_sperm9_id69,p,yes,Unusual head orientation
+sample3_vid10_sperm7_id8,p,yes,Very small head
+sample3_vid10_sperm3_id3,p,yes,Unusual head orientation
+sample3_vid9_sperm32_id305,p,,
+sample3_vid2_sperm5_id5,np,yes,
+sample3_vid7_sperm14_id39,p,,
+sample3_vid2_sperm13_id81,np,yes,tail movement present but very slow
+sample3_vid3_sperm26_id37,p,,
