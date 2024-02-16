@@ -5,4 +5,27 @@ build-backend = "hatchling.build"
 [project]
 name = "pymotility"
 version = "0.1"
-dependencies = ["numpy<1.23", "scipy", "matplotlib", "scikit-image", "scikit-video", "opencv-python", "pytest"]
+dependencies = [
+  "numpy<1.23",
+  "scipy",
+  "matplotlib",
+  "scikit-image",
+  "scikit-video",
+  "opencv-python",
+  "pandas",
+  "pytest",
+]
+
+[tool.nitpick]
+style = [
+  "github://MrP01/lint-me-now/nitpick-base-style.toml",
+  "github://MrP01/lint-me-now/nitpick-python-style.toml",
+]
+
+[tool.black]
+line-length = 120
+
+[tool.ruff]
+line-length = 120
+lint.select = ["I001"]
+exclude = [".git", "**/__pycache__"]
