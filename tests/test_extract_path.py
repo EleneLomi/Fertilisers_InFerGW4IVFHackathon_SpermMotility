@@ -70,5 +70,5 @@ def test_hand_tracked_paths():
 
 
 if __name__ == "__main__":
-    # test_path_extraction()
+    test_path_extraction()
     test_hand_tracked_paths()
