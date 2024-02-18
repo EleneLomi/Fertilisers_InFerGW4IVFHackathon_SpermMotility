@@ -13,7 +13,7 @@ This repository is a group entry to "Fertility: In Vitro, In Silico, In Clinico"
 - [Overview](#overview)
 - [Path Extraction](#path-extraction)
   - [Motivation and Summary](#motivation-and-summary)
-  - [Alogirithm and Implementation.](#alogirithm-and-implementation)
+  - [Alogirithm and Implementation](#alogirithm-and-implementation)
   - [Benchmarking](#benchmarking)
     - [Accuracy Against Hand Tracked Videos](#accuracy-against-hand-tracked-videos)
     - [Performance](#performance)
@@ -58,7 +58,7 @@ We then used the raw path data and calculated motility parameters to classify sp
 
 The data provided for this challenge is pre-tracked videos from 2 sperm samples moving in vitro. To analyse the motion of the sperm we first need to extract the path the sperm takes from the videos. To do this we use the Lucas-Kanade method to estimate the background movement velocity at several "corner" points, take the average velocity after removing outliers, and use the average velocity to build up a path. We went on to validate this method qualitatively using overlaid path animations and quantiatively against hand tracked data, and saw high accuracy. The method is performant, running ~ 1 frame per 0.6ms, and so could easily be adapted to run with a live video stream in real time. Although the real world applicability of this path extraction method in the IVF setting may be slightly limited as it seems likely the system that initally tracked the sperm would record the path data as well, it is plausible that the path data may be lost in a data wipe or hard to accesss in propeitary software and a method such as this one would become necessary.
 
-## Alogirithm and Implementation.
+## Alogirithm and Implementation
 
 <div>
 <div style="display:flex">
@@ -66,7 +66,7 @@ The data provided for this challenge is pre-tracked videos from 2 sperm samples 
     <img src="media/path_detection_algo.png" alt="Figure 1" width="400">
   </div>
 </div>
-<div style="text-align:center">Figure 1: The path extraction algorithm.</div>
+<div style="text-align:center">Figure 2: The path extraction algorithm.</div>
 To estimate the background velocity, we first have to choose good points in the image to track. This is achieved using the Shi-Tomasi corner detection alogorithm. Let $x,y$ decribe the coordinates of an abitrary pixel, $I(x,y)$ be the intensity of the pixel, and $w(x,y)$ be a weighting function. Corners are sharp maximisers of the following function:
 
 ```math
@@ -128,7 +128,7 @@ https://github.com/EleneLomi/Fertilisers/assets/79370760/a9a7a1d8-19c2-4a81-96b7
     <img src="media/handtracked_2.png" alt="Figure 2" width="400">
   </div>
 </div>
-<div style="text-align:center">Figure 2: Hand tracked paths vs lkof_framewise path extraction algorithm.</div>
+<div style="text-align:center">Figure 3: Hand tracked paths vs lkof_framewise path extraction algorithm.</div>
 
 ### Performance
 
@@ -136,11 +136,11 @@ On average for this dataset, one frame took less than 1ms to process so this cou
 
 # Feature Engineering
 
-Given the raw path data, we aimed to ensure that the classification algorithm applied to it is independent of translation and rotation. Therefore, we pursued three different types of data processing. Later, we will discuss how we integrate all three approaches to achieve a more effective clustering algorithm.
+To identify clusters, we combine preprocessing steps, feature extraction and several clustering methods in a mixture of experts methodology. We discuss these preprocessing steps below.
 
 ## Feature Extraction
 
-From the raw path data, several path features can be extracted. Following the work of Alabdulla et al. [ADD CITATION], we extracted the following path variables: curvilinear velocity, straight-line velocity, average line velocity, linear progressive motility, curvilinear path wobbling, average path straightness, average path crossing curvilinear path, and mean angular displacement. A more detailed discussion about these metrics would be beyond the scope of this short report; however, many more details are provided in the cited paper.
+From the raw path data, several path features can be extracted. Following the work of <a href="https://ietresearch.onlinelibrary.wiley.com/doi/full/10.1049/ipr2.12178"> Alabdulla et al.</a> , we extracted the following path variables: curvilinear velocity, straight-line velocity, average line velocity, linear progressive motility, curvilinear path wobbling, average path straightness, average path crossing curvilinear path, and mean angular displacement. A more detailed discussion about these metrics would be beyond the scope of this short report; however, many more details are provided in the cited paper.
 
 In short, our goal is to extract metrics that can classify the motility level and type of the tracked cells.
 
@@ -221,7 +221,7 @@ With the mixture of experts outlined above, implementing an anomaly detection al
 
 # Final Results
 
-The database, which was provided, is limited by the fact that there are no immobile cells tracked. Therefore, we focus our attention on classifying progressive and non-progressive cells. In theory, the best approach would be to use only 2 classes: one for progressive and the other for non-progressive cells. We found that empirically, using 3 classes provides better results. In particular, given the flaws of the tracking algorithm and the short segments, we found that the intermediary class is very helpful.
+The database, which was provided is limited by the fact that there are no immobile cells tracked. Therefore, we focus our attention on classifying progressive and non-progressive cells. In theory, the best approach would be to use only 2 classes: one for progressive and the other for non-progressive cells. We found that empirically, using 3 classes provides better results. In particular, given the flaws of the tracking algorithm and the short segments, we found that the intermediary class is very helpful.
 
 In practice, all cells in the test and train datasets, when we take the most common label over the different segments, get classified either in group 1 (corresponding to non-progressive) or in group 2 (corresponding to progressive). In practice, our algorithm learns independently of the labels, and hence is much more robust. The fact that we are able to classify the groups from just a few examples is very promising. While group 3 (intermediate segment) is never used to classify a cell.
 
