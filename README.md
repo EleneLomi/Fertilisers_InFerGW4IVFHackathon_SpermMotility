@@ -1,6 +1,6 @@
 # Fertilisers
-This repository is a group entry to "Fertility: In Vitro, In Silico, In Clinico" hackathon.
 
+This repository is a group entry to "Fertility: In Vitro, In Silico, In Clinico" hackathon.
 
 ## <span style="color:blue">GOAL: We need to choose the project.</span>
 
@@ -11,6 +11,7 @@ This repository is a group entry to "Fertility: In Vitro, In Silico, In Clinico"
   - [Table of Contents](#table-of-contents)
 - [Introduction](#introduction)
 - [Background](#background)
+- [Overview](#overview)
 - [Path Extraction](#path-extraction)
   - [Motivation and Summary](#motivation-and-summary)
   - [Alogirithm and Implementation.](#alogirithm-and-implementation)
@@ -33,6 +34,7 @@ This repository is a group entry to "Fertility: In Vitro, In Silico, In Clinico"
 - [Team](#team)
 
 ---
+
 # Introduction
 
 (Elene: Need to edit)
@@ -44,53 +46,85 @@ Our objective was to conduct a temporal analysis of sperm movement patterns obse
 
 Furthermore, we aimed to classify sperm motility patterns using unsupervised machine learning techniques. We used a method of expert approach to cluster the data without using labels. We then labeled a few of the cells as either progressive or non-progressive in order to interpret the clusters. This approach gave us an accuracy of over 90%.
 
+# Overview
+
+<div>
+<div style="display:flex">
+  <div style="flex:50%; padding:10px; text-align:center;">
+    <img src="media/ivf_hackathon_methodology.png" alt="Figure 1" width="400">
+  </div>
+</div>
+<div style="text-align:center">Figure 1: Our anomaly detection methodology.</div>
+
 # Path Extraction
+
 ## Motivation and Summary
-The data provided for this challenge is pre-tracked videos from 2 sperm samples moving in vitro. To analyse the motion of the sperm we first need to extract the path the sperm takes from the videos. To do this we use the Lucas-Kanade method to estimate the background movement velocity at several "corner" points, take the average velocity after removing outliers, and use the average velocity to build up a path. We went on to validate this method qualitatively using overlaid path animations and quantiatively against hand tracked data, and saw high accuracy. The method is performant, running ~ 1 frame per 0.6ms, and so could easily be adapted to run with a live video stream in real time. Although the real world applicability of this path extraction method in the IVF setting may be slightly limited as it seems likely the system that initally tracked the sperm would record the path data as well, it is plausible that the path data may be lost in a data wipe or hard to accesss in propeitary software and a method such as this one would become necessary. 
+
+The data provided for this challenge is pre-tracked videos from 2 sperm samples moving in vitro. To analyse the motion of the sperm we first need to extract the path the sperm takes from the videos. To do this we use the Lucas-Kanade method to estimate the background movement velocity at several "corner" points, take the average velocity after removing outliers, and use the average velocity to build up a path. We went on to validate this method qualitatively using overlaid path animations and quantiatively against hand tracked data, and saw high accuracy. The method is performant, running ~ 1 frame per 0.6ms, and so could easily be adapted to run with a live video stream in real time. Although the real world applicability of this path extraction method in the IVF setting may be slightly limited as it seems likely the system that initally tracked the sperm would record the path data as well, it is plausible that the path data may be lost in a data wipe or hard to accesss in propeitary software and a method such as this one would become necessary.
 
 ## Alogirithm and Implementation.
-To estimate the background velocity, we first have to choose good points in the image to track. This is achieved using the Shi-Tomasi corner detection alogorithm. Let $x,y$ decribe the coordinates of an abitrary pixel, $I(x,y)$ be the intensity of the pixel, and $w(x,y)$ be a weighting function. Corners are sharp maximisers of the following function: 
+
+<!-- include image here -->
+
+<div>
+<div style="display:flex">
+  <div style="flex:50%; padding:10px; text-align:center;">
+    <img src="media/path_detection_algo.png" alt="Figure 1" width="400">
+  </div>
+</div>
+<div style="text-align:center">Figure 1: The path extraction algorithm.</div>
+To estimate the background velocity, we first have to choose good points in the image to track. This is achieved using the Shi-Tomasi corner detection alogorithm. Let $x,y$ decribe the coordinates of an abitrary pixel, $I(x,y)$ be the intensity of the pixel, and $w(x,y)$ be a weighting function. Corners are sharp maximisers of the following function:
+
 ```math
 E(u, v)=\sum_{x, y} \underbrace{w(x, y)}_{\text {weighting function }}[\underbrace{I(x+u, y+v)}_{\text {shifted intensity }}-\underbrace{I(x, y)}_{\text {intensity }}]^2 \approx\left[\begin{array}{ll} u & v \end{array}\right] M\left[\begin{array}{l} u \\ v \end{array}\right]
 ```
-where 
+
+where
+
 ```math
 M=\sum_{x, y} w(x, y)\left[\begin{array}{ll} I_x I_x & I_x I_y \\ I_x I_y & I_y I_y \end{array}\right]
 ```
+
 where $I_x$ and $I_y$ are the image derivatives, which can be seen by linearity and taylor expansion.
 The quality of a corner can be identified by the size of the minimum eigenvalue of $M$, namely
 $$R=\min(\lambda_1,\lambda_2).$$
-We choose the $k$ highest ranked corners using this metric for tracking. In practice this is implemented using ```cv2.goodFeaturesToTrack``` with $k=5$, and mask out the center to avoid tracking the sperm head.
+We choose the $k$ highest ranked corners using this metric for tracking. In practice this is implemented using `cv2.goodFeaturesToTrack` with $k=5$, and mask out the center to avoid tracking the sperm head.
 
-
-Once we have good features to track, we estimate the local optical flow using the Lucas-Kanade method. 
+Once we have good features to track, we estimate the local optical flow using the Lucas-Kanade method.
 This assumes that the flow is locally approximately constant which is valid for the moving background
 in this dataset. A window of points which we label $\mathbf{x}_i=(x_i,y_i)$ for $i \in 0,...n$ is taken around the tracked pixel. Imposing the optical flow condition at each point gives an overdetermined stystem
+
 ```math
 I_x(\mathbf{x}_i) v_x+I_y(\mathbf{x}_i) v_y = - I_t(\mathbf{x}_i)
 ```
+
 where $I_x,I_y$ and $I_t$ are the image derivates with respect to $x,y$ and $t$ respectively. We can write this in matrix form as a least squares problem
+
 ```math
 \mathbf{v}^*=\min_{\mathbf{v}}A\mathbf{v}-\mathbf{b}
 ```
-where 
+
+where
+
 ```math
 A=\left[\begin{array}{cc} I_x\left(\mathbf{x}_1\right) & I_y\left(\mathbf{x}_1\right) \\ I_x\left(\mathbf{x}_2\right) & I_y\left(\mathbf{x}_2\right) \\ \vdots & \vdots \\ I_x\left(\mathbf{x}_n\right) & I_y\left(\mathbf{x}_n\right) \end{array}\right] \quad v=\left[\begin{array}{c} v_x \\ v_y \end{array}\right] \quad b=\left[\begin{array}{c} -I_t\left(\mathbf{x}_1\right) \\ -I_t\left(\mathbf{x}_2\right) \\ \vdots \\ -I_t\left(\mathbf{x}_n\right) \end{array}\right].
 ```
-Solving this problem gives us the Lucas-Kanade estimate of the local optical flow. In practice this is implemented using ```cv2.calcOpticalFlowPyrLK```.
-To avoid detecting other moving sperm, we remove outliers from the flow vectors. This is achieved using the mahalanobis distance, which is defined as 
+
+Solving this problem gives us the Lucas-Kanade estimate of the local optical flow. In practice this is implemented using `cv2.calcOpticalFlowPyrLK`.
+To avoid detecting other moving sperm, we remove outliers from the flow vectors. This is achieved using the mahalanobis distance, which is defined as
 $$d_M(\mathbf{x},X)=\sqrt{(\mathbf{x}-\mathbf{\mu})S^{-1}(\mathbf{x}-\mathbf{\mu})}$$
 where $X$ is a proability distribution with mean $\mu$ and covariance matrix $S$. In practice we estimate this using the sample mean and covariance matrix. Sample points with a mahalanobis distance greater than 2
 are rejected.
 
 Finally, the optical flow is estimated using the mean of the remaining flow vectors, and the position of the background is incremented and stored in a vector.
-The full implementation can be found in ```pymotility/path_extraction/extract_path.py::lkof_framewise_extract_path```.
+The full implementation can be found in `pymotility/path_extraction/extract_path.py::lkof_framewise_extract_path`.
+
 ## Benchmarking
 
 https://github.com/EleneLomi/Fertilisers/assets/79370760/84bf0ab1-017f-44d1-8931-62ccfc0ceeb7
 
-
 ### Accuracy Against Hand Tracked Videos
+
 <div>
 <div style="display:flex">
   <div style="flex:50%; padding:10px;">
@@ -100,10 +134,11 @@ https://github.com/EleneLomi/Fertilisers/assets/79370760/84bf0ab1-017f-44d1-8931
     <img src="media/handtracked_2.png" alt="Figure 2" width="400">
   </div>
 </div>
-<div style="text-align:center">Figure 1: Hand tracked paths vs lkof_framewise path extraction algorithm.</div>
+<div style="text-align:center">Figure 2: Hand tracked paths vs lkof_framewise path extraction algorithm.</div>
 
 ### Performance
-On average for this dataset, 
+
+On average for this dataset, one frame took less than 1ms to process so this could easily be incorporated into a live video stream processing workflow.
 
 # Feature Engineering
 
@@ -127,8 +162,8 @@ Another approach to the problem described above is to center the beginning of th
 
 Another improvement we have found is to segment the paths. In this case, we segment every path in multiple pieces, each of the length of 23 frames. We found this to provide better accuracy. In particular, later in classification each segment could be mapped to a different cluster and hence the resulting classificiation can be either temporally split or made more robust but taking the most common label from each segment. This is what we end up doing. This will be very important later.
 
-
 # Mixture of Experts
+
 Given the features we have extracted, our aim is to use unsupervised learning for clustering the paths. The objective is to then utilize the trained model for clustering unknown samples as well as performing anomaly detection. In this section, we present our learning architecture based on a mixture of experts, which provides a more robust unsupervised learning approach compared to using a single architecture.
 
 # Dynamic Time Warping
@@ -150,6 +185,7 @@ def dtw(A,B):
 where `norm` is simply the norm we prefer, in our case we consider the 2-norm. We found out that results are better if we take A and B to be either the X or the Y coordinates of a path. Hence the total distance between two paths is given by the sum of the DTW between the X coordinates and the Y coordinates. Note that this is consistent with the translation and rotation we perform at the beginning.
 
 # K-Means and K-Medoids
+
 We employ both the K-Means and K-Medoids unsupervised algorithms in our approach. The concept is straightforward: given data, we cluster it into $k$ different subgroups. Each group is characterized by a center, and each point is assigned to the center to which it is closest.
 
 The K-Means algorithm begins by randomly setting the centers and then clustering all the data by assigning them to the nearest center based on some norm. Subsequently, it recalculates the centers so that the new center is precisely at the mean of all points within that group. Then, it re-clusters all the points based on these centers, and so forth. This process is repeated until convergence is achieved, i.e., when the recomputation of centers does not change the clustering of points.
@@ -186,6 +222,7 @@ Given a new path, we can classify it by comparing it to the computed centers for
 We leverage the mixture of experts by assigning a path to the label to which it is most frequently assigned using a majority rule. Hence, we could say that each method "votes" on the class membership of a new path. Since each method considers different features, this makes the classification more robust to perturbations, errors in path extraction, and other potential anomalies.
 
 ## Anomaly Detection
+
 With the mixture of experts outlined above, implementing an anomaly detection algorithm for a new path is straightforward. A path is detected as 'anomalous' if it lies far from any of the cluster centers. Again, we employ a majority rule among the three experts, enhancing the robustness of our anomaly detection approach.
 
 # Final Results
@@ -197,6 +234,7 @@ In practice, all cells in the test and train datasets, when we take the most com
 Given that we interpret the groups this way, we achieve a 92.68% accuracy on the hand-labeled dataset. Below, we will review some of the mistakes and successes of our algorithm. We note that we did not use the hand-labelled data during the training of the models.
 
 ## Successes
+
 Non-progressive cells:
 
 [VIDEO sample3_vid7_sperm21_id345 AND sample1_vid5_sperm15_id70]
@@ -206,6 +244,7 @@ Progressive cells:
 [VIDEO sample3_vid1_sperm15_id409 AND sample3_vid5_sperm3_id256]
 
 ## Errors and Anomalies
+
 These two cells were misclassified:
 
 [VIDEO sample1_vid1_sperm3_id3, sample3_vid2_sperm13_id81]
@@ -215,4 +254,5 @@ This cell got flagged as anomalous as it was lying far away from the centers of 
 [VIDEO sample3_vid9_sperm16_id149]
 
 # Team
+
 Our team is made up of Mitja Devetak, Elene Lominadze, Ben Nicholls-Mindlin and Peter Waldert.
