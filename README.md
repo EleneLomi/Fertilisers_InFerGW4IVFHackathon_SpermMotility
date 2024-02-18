@@ -121,7 +121,9 @@ The full implementation can be found in `pymotility/path_extraction/extract_path
 
 ## Benchmarking
 
-https://github.com/EleneLomi/Fertilisers/assets/79370760/84bf0ab1-017f-44d1-8931-62ccfc0ceeb7
+https://github.com/EleneLomi/Fertilisers/assets/79370760/a9a7a1d8-19c2-4a81-96b7-bd292e8c0c08
+
+
 
 ### Accuracy Against Hand Tracked Videos
 
@@ -237,7 +239,11 @@ Given that we interpret the groups this way, we achieve a 92.68% accuracy on the
 
 Non-progressive cells:
 
-[VIDEO sample3_vid7_sperm21_id345 AND sample1_vid5_sperm15_id70]
+<!-- [VIDEO sample3_vid7_sperm21_id345 AND sample1_vid5_sperm15_id70] -->
+
+https://github.com/EleneLomi/Fertilisers/assets/79370760/e539b296-3dc4-47b7-a698-e1074b01401e
+
+https://github.com/EleneLomi/Fertilisers/assets/79370760/e3733cb2-0c6f-4b21-8607-682dced22662
 
 Progressive cells:
 
@@ -247,11 +253,23 @@ Progressive cells:
 
 These two cells were misclassified:
 
-[VIDEO sample1_vid1_sperm3_id3, sample3_vid2_sperm13_id81]
+<!-- [VIDEO sample1_vid1_sperm3_id3, sample3_vid2_sperm13_id81] -->
+
+
+
+https://github.com/EleneLomi/Fertilisers/assets/79370760/9e1c851d-5021-4b25-be9d-f5cf5853b2bc
+
+https://github.com/EleneLomi/Fertilisers/assets/79370760/1adf1ed2-57ea-45da-a52c-f7b0459894ba
+
+
 
 This cell got flagged as anomalous as it was lying far away from the centers of two out of three experts:
 
-[VIDEO sample3_vid9_sperm16_id149]
+<!-- [VIDEO sample3_vid9_sperm16_id149] -->
+
+https://github.com/EleneLomi/Fertilisers/assets/79370760/31e28795-c96b-4c95-82a3-80c9a68c829c
+
+
 
 # Team
 
