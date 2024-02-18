@@ -4,40 +4,6 @@ This repository is a group entry to "Fertility: In Vitro, In Silico, In Clinico"
 
 ## SUMMARY: Automated Workflow to Aid in Sperm Selection from Video Data
 
-## Table of Contents
-
-- [Fertilisers](#fertilisers)
-  - [SUMMARY: Automated Workflow to Aid in Sperm Selection from Video Data](#summary-automated-workflow-to-aid-in-sperm-selection-from-video-data)
-  - [Table of Contents](#table-of-contents)
-- [Introduction and Background](#introduction-and-background)
-- [Overview](#overview)
-- [Path Extraction](#path-extraction)
-  - [Motivation and Summary](#motivation-and-summary)
-  - [Alogirithm and Implementation](#alogirithm-and-implementation)
-  - [Benchmarking](#benchmarking)
-    - [Accuracy Against Hand Tracked Videos](#accuracy-against-hand-tracked-videos)
-    - [Performance](#performance)
-- [Feature Engineering](#feature-engineering)
-  - [Feature Extraction](#feature-extraction)
-  - [Recentering and Rotation](#recentering-and-rotation)
-  - [Recentering and PCA](#recentering-and-pca)
-  - [Path Segmentation](#path-segmentation)
-- [Mixture of Experts](#mixture-of-experts)
-- [Dynamic Time Warping](#dynamic-time-warping)
-- [K-Means and K-Medoids](#k-means-and-k-medoids)
-  - [Mixture of Experts](#mixture-of-experts-1)
-  - [Anomaly Detection](#anomaly-detection)
-- [Final Results](#final-results)
-  - [Successes](#successes)
-  - [Errors and Anomalies](#errors-and-anomalies)
-- [Team](#team)
-
----
-
-# Introduction and Background
-
-In the 1960s and 1970s, our understanding of the events in human oocyte fertilization grew to the point that in vitro fertilization (IVF) of human oocytes became possible. Ultimately, this knowledge led to the widely acclaimed first live birth of a “test tube baby,” Louise Brown, in England in 1978. Today, IVF accounts for millions of births worldwide and 1–3% of all births every year in the U.S. and Europe. The use of IVF has been on the rise recently, mostly as a result of deferred childbearing, and there is no reason to believe that this trend will alter. The focus of a great deal of research nowadays is to improve on the current ~30% success rate of IVF. Artificial intelligence and computational modelling have been gaining traction for their potential to improve outcomes for IVF. In this project, we use computer vision and unsupervised learning tools to create an automated workflow which can quickly identify sperm motility patterns from video data of individual sperm, which could ultimately assist embryologists in selecting viable sperm for use in IVF treatments.
-
 # Overview
 
 Our objective was to conduct a temporal analysis of sperm movement patterns observed throughout the duration of the videos. To achieve this we developed an algorithm to extract path data a video dataset and calculated quantitative motility parameters such as the velocity, straight-line distance and curvilinear distance.
@@ -82,7 +48,7 @@ M=\sum_{x, y} w(x, y)\left[\begin{array}{ll} I_x I_x & I_x I_y \\ I_x I_y & I_y 
 where $I_x$ and $I_y$ are the image derivatives, which can be seen by linearity and taylor expansion.
 The quality of a corner can be identified by the size of the minimum eigenvalue of $M$, namely
 $$R=\min(\lambda_1,\lambda_2).$$
-We choose the $k$ highest ranked corners using this metric for tracking. In practice this is implemented using `cv2.goodFeaturesToTrack` with $k=5$, and mask out the center to avoid tracking the sperm head.
+We choose the $k$ highest ranked corners using this metric for tracking. We also mask out the center to avoid tracking the sperm head.
 
 Once we have good features to track, we estimate the local optical flow using the Lucas-Kanade method.
 This assumes that the flow is locally approximately constant which is valid for the moving background
@@ -104,14 +70,13 @@ where
 A=\left[\begin{array}{cc} I_x\left(\mathbf{x}_1\right) & I_y\left(\mathbf{x}_1\right) \\ I_x\left(\mathbf{x}_2\right) & I_y\left(\mathbf{x}_2\right) \\ \vdots & \vdots \\ I_x\left(\mathbf{x}_n\right) & I_y\left(\mathbf{x}_n\right) \end{array}\right] \quad v=\left[\begin{array}{c} v_x \\ v_y \end{array}\right] \quad b=\left[\begin{array}{c} -I_t\left(\mathbf{x}_1\right) \\ -I_t\left(\mathbf{x}_2\right) \\ \vdots \\ -I_t\left(\mathbf{x}_n\right) \end{array}\right].
 ```
 
-Solving this problem gives us the Lucas-Kanade estimate of the local optical flow. In practice this is implemented using `cv2.calcOpticalFlowPyrLK`.
+Solving this problem gives us the Lucas-Kanade estimate of the local optical flow. 
 To avoid detecting other moving sperm, we remove outliers from the flow vectors. This is achieved using the mahalanobis distance, which is defined as
 $$d_M(\mathbf{x},X)=\sqrt{(\mathbf{x}-\mathbf{\mu})S^{-1}(\mathbf{x}-\mathbf{\mu})}$$
 where $X$ is a proability distribution with mean $\mu$ and covariance matrix $S$. In practice we estimate this using the sample mean and covariance matrix. Sample points with a mahalanobis distance greater than 2
 are rejected.
 
 Finally, the optical flow is estimated using the mean of the remaining flow vectors, and the position of the background is incremented and stored in a vector.
-The full implementation can be found in `pymotility/path_extraction/extract_path.py::lkof_framewise_extract_path`.
 
 ## Benchmarking
 
@@ -129,10 +94,6 @@ https://github.com/EleneLomi/Fertilisers/assets/79370760/a9a7a1d8-19c2-4a81-96b7
   </div>
 </div>
 <div style="text-align:center">Figure 3: Hand tracked paths vs lkof_framewise path extraction algorithm.</div>
-
-### Performance
-
-On average for this dataset, one frame took less than 1ms to process so this could easily be incorporated into a live video stream processing workflow.
 
 # Feature Engineering
 
