@@ -14,6 +14,7 @@ from itertools import product, permutations
 import numpy as np
 import csv
 import warnings
+
 # ignore warnings
 warnings.filterwarnings("ignore")
 
@@ -325,8 +326,6 @@ if __name__ == "__main__":
             classifcialtion.append(row[1])
             filenames_class.append(row[0])
 
-
-
     filenames = [filename.split(".")[0] for filename in filenames]
 
     # get the indices of the filenames in the csv table
@@ -339,7 +338,6 @@ if __name__ == "__main__":
         writer.writerow(["Filename", "Prediction", "Anomaly", "Classification"])
         for i in range(len(filenames)):
             writer.writerow([filenames[i], predictions[i], anomalies[i], classification[i]])
-
 
     classification = [1 if classification[i] == "np" else 2 for i in range(len(classification))]
 

@@ -40,9 +40,9 @@ In the 1960s and 1970s, our understanding of the events in human oocyte fertiliz
 
 # Background
 
-Our objective was to conduct a temporal analysis of sperm movement patterns observed throughout the duration of the videos. This involved developing an algorithm to extract quantitative motility parameters from the videos, including velocity, straight-line distance, curvilinear distance and head movement pattern.
+Our objective was to conduct a temporal analysis of sperm movement patterns observed throughout the duration of the videos. This involved developing an algorithm to extract quantitative motility parameters from the videos, including velocity, straight-line distance and curvilinear distance.
 
-Furthermore, we aimed to classify sperm motility patterns using machine learning techniques. The model was trained to differentiate between various categories, such as progressive motility (characterized by active movement with a speed $\geq 5\mu m/s$), non-progressive motility (exhibiting active tail movement but with an overall slow speed $< 5\mu m/s$), and immobility (with no active tail movements).
+Furthermore, we aimed to classify sperm motility patterns using unsupervised machine learning techniques. We used a method of expert approach to cluster the data without using labels. We then labeled a few of the cells as either progressive or non-progressive in order to interpret the clusters. This approach gave us an accuracy of over 90%.
 
 # Path Extraction
 ## Motivation and Summary
@@ -169,16 +169,19 @@ We then align the (arbitrary) labels of each method to minimize the elements whi
 ```
 Center Index Congruent Label:  2
 Mean Straight Line Velocity: 1.8504304990846459
+Corresponding to Progrsessive cells path segments.
 
 Center Index Congruent Label:  1
 Mean Straight Line Velocity: 0.6805590579486639
+Corresponding to Non-Progrsessive cells path segments.
 
 Center Index Congruent Label:  0
 Mean Straight Line Velocity: 1.8684070122829306
+Corresponding to unknown cells path segments.
 
 ```
 
-Given a new path, we can classify it by comparing it to the computed centers for each method. This process is very fast, as we only need to compare the new path to the cluster centers as opposed to the whole database.
+Given a new path, we can classify it by comparing it to the computed centers for each method. If the new path is longer than the used segment we segment it and compare it piecewise. This process is very fast, as we only need to compare the new path to the cluster centers as opposed to the whole database.
 
 We leverage the mixture of experts by assigning a path to the label to which it is most frequently assigned using a majority rule. Hence, we could say that each method "votes" on the class membership of a new path. Since each method considers different features, this makes the classification more robust to perturbations, errors in path extraction, and other potential anomalies.
 
@@ -191,7 +194,7 @@ The database, which was provided, is limited by the fact that there are no immob
 
 In practice, all cells in the test and train datasets, when we take the most common label over the different segments, get classified either in group 1 (corresponding to non-progressive) or in group 2 (corresponding to progressive). In practice, our algorithm learns independently of the labels, and hence is much more robust. The fact that we are able to classify the groups from just a few examples is very promising. While group 3 (intermediate segment) is never used to classify a cell.
 
-Given that we interpret the groups this way, we achieve a 92.68% accuracy on the hand-labeled dataset. Below, we will review some of the mistakes and successes of our algorithm.
+Given that we interpret the groups this way, we achieve a 92.68% accuracy on the hand-labeled dataset. Below, we will review some of the mistakes and successes of our algorithm. We note that we did not use the hand-labelled data during the training of the models.
 
 ## Successes
 Non-progressive cells:
