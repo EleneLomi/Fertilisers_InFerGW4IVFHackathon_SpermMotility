@@ -101,7 +101,7 @@ To identify clusters, we combine preprocessing steps, feature extraction and sev
 
 ## Feature Extraction
 
-From the raw path data, several path features can be extracted. Following the work of <a href="https://ietresearch.onlinelibrary.wiley.com/doi/full/10.1049/ipr2.12178"> Alabdulla et al.</a> , we extracted the following path variables: curvilinear velocity, straight-line velocity, average line velocity, linear progressive motility, curvilinear path wobbling, average path straightness, average path crossing curvilinear path, and mean angular displacement. A more detailed discussion about these metrics would be beyond the scope of this short report; however, many more details are provided in the cited paper.
+From the raw path data, several path features can be extracted. Following the work of <a href="https://ietresearch.onlinelibrary.wiley.com/doi/full/10.1049/ipr2.12178"> Alabdulla et al.</a> , we extracted the following path variables: curvilinear velocity, straight-line velocity, average line velocity, linear progressive motility, curvilinear path wobbling, average path straightness, average path crossing curvilinear path, and mean angular displacement.
 
 In short, our goal is to extract metrics that can classify the motility level and type of the tracked cells.
 
@@ -123,7 +123,7 @@ Given the features we have extracted, our aim is to use unsupervised learning fo
 
 # Dynamic Time Warping
 
-Dynamic Time Warping (DTW) is a technique used to measure similarity between two temporal. For instance, in time series analysis, DTW can compare two sequences that may not align perfectly in time but nevertheless exibith similar traits (like going in a straight line or wobbling). In this case we use dynamic time warping to compute the distances between extracted paths.
+Dynamic Time Warping (DTW) is a technique used to measure similarity between two temporal sequences. For instance, in time series analysis, DTW can compare two sequences that may not align perfectly in time but nevertheless exibith similar traits (like going in a straight line or wobbling). In this case we use DTW to compute the distances between extracted paths.
 
 The algorithm works by finding the optimal allignemnt between two sequences. The pseudocode to calculate the distance between two time series A and B, both of length $n$ is:
 
@@ -145,7 +145,7 @@ We employ both the K-Means and K-Medoids unsupervised algorithms in our approach
 
 The K-Means algorithm begins by randomly setting the centers and then clustering all the data by assigning them to the nearest center based on some norm. Subsequently, it recalculates the centers so that the new center is precisely at the mean of all points within that group. Then, it re-clusters all the points based on these centers, and so forth. This process is repeated until convergence is achieved, i.e., when the recomputation of centers does not change the clustering of points.
 
-The K-Medoids algorithm is utilized when the norm used for classifying points does not allow for a mean to be computed. This scenario arises with the Dynamic Time Warping algorithm, where defining a time series that is exactly in between two time series is not possible. In such cases, the center is taken to be the element in the group that is closest to all other elements, serving as an approximation to the mean in the K-Means algorithm. The rest of the algorithm is similar.
+The K-Medoids algorithm is utilized when the norm used for classifying points does not allow for a mean to be computed. This scenario arises with the DTW algorithm, where defining a time series that is exactly in between two time series is not possible. In such cases, the center is taken to be the element in the group that is closest to all other elements, serving as an approximation to the mean in the K-Means algorithm. The rest of the algorithm is similar.
 
 ## Mixture of Experts
 
