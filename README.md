@@ -272,6 +272,7 @@ This cell got flagged as anomalous as it was lying far away from the centers of 
 
 https://github.com/EleneLomi/Fertilisers/assets/79370760/31e28795-c96b-4c95-82a3-80c9a68c829c
 
+We believe because it is moving much faster and straighter than the other cells.
 
 
 # Team
