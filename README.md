@@ -247,7 +247,11 @@ https://github.com/EleneLomi/Fertilisers/assets/79370760/e3733cb2-0c6f-4b21-8607
 
 Progressive cells:
 
-[VIDEO sample3_vid1_sperm15_id409 AND sample3_vid5_sperm3_id256]
+<!--[VIDEO sample3_vid1_sperm15_id409 AND sample3_vid5_sperm3_id256]-->
+
+https://github.com/EleneLomi/Fertilisers/assets/79370760/1a580d7f-f48f-4862-a7a9-ad32b3100e10
+
+https://github.com/EleneLomi/Fertilisers/assets/79370760/8d35b28d-4549-4b1b-8cff-c04ce1a84cc6
 
 ## Errors and Anomalies
 
