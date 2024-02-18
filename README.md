@@ -17,7 +17,16 @@ This repository is a group entry to "Fertility: In Vitro, In Silico, In Clinico"
   - [Benchmarking](#benchmarking)
     - [Accuracy Against Hand Tracked Videos](#accuracy-against-hand-tracked-videos)
     - [Performance](#performance)
-- [Path Analysis](#path-analysis)
+- [Feature Engineering](#feature-engineering)
+  - [Feature Extraction](#feature-extraction)
+  - [Recentering and Rotation](#recentering-and-rotation)
+  - [Recentering and PCA](#recentering-and-pca)
+- [Mixture of Experts](#mixture-of-experts)
+- [Dynamic Time Warping](#dynamic-time-warping)
+- [K-Means and K-Medoids](#k-means-and-k-medoids)
+  - [Mixture of Experts](#mixture-of-experts-1)
+  - [Anomaly Detection](#anomaly-detection)
+- [Final Results](#final-results)
 - [Team](#team)
 
 ---
@@ -92,7 +101,70 @@ https://github.com/EleneLomi/Fertilisers/assets/79370760/84bf0ab1-017f-44d1-8931
 
 ### Performance
 On average for this dataset, 
-# Path Analysis
+
+# Feature Engineering
+
+Given the raw path data, we aimed to ensure that the classification algorithm applied to it is independent of translation and rotation. Therefore, we pursued three different types of data processing. Later, we will discuss how we integrate all three approaches to achieve a more effective clustering algorithm.
+
+## Feature Extraction
+
+From the raw path data, several path features can be extracted. Following the work of Alabdulla et al. [ADD CITATION], we extracted the following path variables: curvilinear velocity, straight-line velocity, average line velocity, linear progressive motility, curvilinear path wobbling, average path straightness, average path crossing curvilinear path, and mean angular displacement. A more detailed discussion about these metrics would be beyond the scope of this short report; however, many more details are provided in the cited paper.
+
+In short, our goal is to extract metrics that can classify the motility level and type of the tracked cells.
+
+## Recentering and Rotation
+
+A desirable attribute of our classification model is its translational and rotational invariance. That is, if a cell starts moving from a different spot on the Cartesian plane or it moves at a different angle, we would still classify the cell as the same type. Hence, we directly incorporate this inductive bias into the learner we trained by re-centering every path so that it starts at the origin. Furthermore, we rotate every path so that the final point also lies on the x-axis.
+
+## Recentering and PCA
+
+Another approach to the problem described above is to center the beginning of the path on the origin and then take the x-axis to be the direction of the greatest change. In this case, we consider the path as a matrix of shape (T, 2) and align the x-axis with the vector corresponding to the eigenvector with the largest eigenvalue. We note that this approach again produces a path that is rotationally and translationally invariant. Furthermore, the path is also invariant to mirroring across any of the axes.
+
+# Mixture of Experts
+Given the features we have extracted, our aim is to use unsupervised learning for clustering the paths. The objective is to then utilize the trained model for clustering unknown samples as well as performing anomaly detection. In this section, we present our learning architecture based on a mixture of experts, which provides a more robust unsupervised learning approach compared to using a single architecture.
+
+# Dynamic Time Warping
+Before we proceed,
+
+# K-Means and K-Medoids
+We employ both the K-Means and K-Medoids unsupervised algorithms in our approach. The concept is straightforward: given data, we cluster it into $k$ different subgroups. Each group is characterized by a center, and each point is assigned to the center to which it is closest.
+
+The K-Means algorithm begins by randomly setting the centers and then clustering all the data by assigning them to the nearest center based on some norm. Subsequently, it recalculates the centers so that the new center is precisely at the mean of all points within that group. Then, it re-clusters all the points based on these centers, and so forth. This process is repeated until convergence is achieved, i.e., when the recomputation of centers does not change the clustering of points.
+
+The K-Medoids algorithm is utilized when the norm used for classifying points does not allow for a mean to be computed. This scenario arises with the Dynamic Time Warping algorithm, where defining a time series that is exactly in between two time series is not possible. In such cases, the center is taken to be the element in the group that is closest to all other elements, serving as an approximation to the mean in the K-Means algorithm. The rest of the algorithm is similar.
+
+## Mixture of Experts
+
+Based on the above, we train three different unsupervised learning algorithms:
+
+- K-Means on the vector of path features.
+- K-Means on the x-axis of the data that is rotated using eigenvectors with the standard 2-norm.
+- K-Medoids on the translated and rotated data using Dynamic Time Warping.
+
+We then align the (arbitrary) labels of each method to minimize the elements which are labeled differently by the methods. The final result is:
+
+```
+Center Index Congruent Label:  1
+Mean Straight Line Velocity: 0.5817308225635153
+
+Center Index Congruent Label:  3
+Mean Straight Line Velocity: 2.2141501989892225
+
+Center Index Congruent Label:  2
+Mean Straight Line Velocity: 1.831724451074591
+
+Center Index Congruent Label:  0
+Mean Straight Line Velocity: 1.1861126611941628
+```
+
+Given a new path, we can classify it by comparing it to the computed centers for each method. This process is very fast, as we only need to compare the new path to the cluster centers as opposed to the whole database.
+
+We leverage the mixture of experts by assigning a path to the label to which it is most frequently assigned using a majority rule. Hence, we could say that each method "votes" on the class membership of a new path. Since each method considers different features, this makes the classification more robust to perturbations, errors in path extraction, and other potential anomalies.
+
+## Anomaly Detection
+With the mixture of experts outlined above, implementing an anomaly detection algorithm for a new path is straightforward. A path is detected as 'anomalous' if it lies far from any of the cluster centers. Again, we employ a majority rule between the three experts, enhancing the robustness of our anomaly detection approach.
+
+# Final Results
 
 # Team
-Our team is made up of Mitja Devetak, Elene Lominadze, Ben Nicholls-Mindlin and Peter Waldert. We all met studying Mathematical Modelling and Scientific Computing at the University of Oxford.
+Our team is made up of Mitja Devetak, Elene Lominadze, Ben Nicholls-Mindlin and Peter Waldert.
