@@ -9,11 +9,13 @@ import pymotility.path_extraction as pe
 def animate_paths():
     root = "/Users/benn-m/Documents/ivf_hackathon/SpermDB"
     vid_names = [
-        "sample3_vid7_sperm21_id345",
-        "sample1_vid5_sperm15_id70",
-        "sample1_vid1_sperm3_id3",
-        "sample3_vid2_sperm13_id81",
-        "sample3_vid9_sperm16_id149",
+        # "sample3_vid7_sperm21_id345",
+        # "sample1_vid5_sperm15_id70",
+        # "sample1_vid1_sperm3_id3",
+        # "sample3_vid2_sperm13_id81",
+        # "sample3_vid9_sperm16_id149",
+        "sample3_vid1_sperm15_id409",
+        "sample3_vid5_sperm3_id256",
     ]
     vid_paths = []
     for vid_name in vid_names:
@@ -32,9 +34,9 @@ def animate_paths():
         video = vread(vid_name)
         path = pe.extract_path(video, method=method, denoise=False)
         name = vid_name.split("/")[-1].split(".")[0]
-        np.save(f"{output_dir}/{method}/{name}.npy", path)
+        np.save(f"{output_dir}/{name}.npy", path)
         anim = pe.animate_path(video, path)
-        anim.save(f"{output_dir}/{method}/{name}.mp4")
+        anim.save(f"{output_dir}/{name}.mp4")
 
 
 if __name__ == "__main__":
