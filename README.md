@@ -21,12 +21,15 @@ This repository is a group entry to "Fertility: In Vitro, In Silico, In Clinico"
   - [Feature Extraction](#feature-extraction)
   - [Recentering and Rotation](#recentering-and-rotation)
   - [Recentering and PCA](#recentering-and-pca)
+  - [Path Segmentation](#path-segmentation)
 - [Mixture of Experts](#mixture-of-experts)
 - [Dynamic Time Warping](#dynamic-time-warping)
 - [K-Means and K-Medoids](#k-means-and-k-medoids)
   - [Mixture of Experts](#mixture-of-experts-1)
   - [Anomaly Detection](#anomaly-detection)
 - [Final Results](#final-results)
+  - [Successes](#successes)
+  - [Errors and Anomalies](#errors-and-anomalies)
 - [Team](#team)
 
 ---
@@ -120,11 +123,31 @@ A desirable attribute of our classification model is its translational and rotat
 
 Another approach to the problem described above is to center the beginning of the path on the origin and then take the x-axis to be the direction of the greatest change. In this case, we consider the path as a matrix of shape (T, 2) and align the x-axis with the vector corresponding to the eigenvector with the largest eigenvalue. We note that this approach again produces a path that is rotationally and translationally invariant. Furthermore, the path is also invariant to mirroring across any of the axes.
 
+## Path Segmentation
+
+Another improvement we have found is to segment the paths. In this case, we segment every path in multiple pieces, each of the length of 23 frames. We found this to provide better accuracy. In particular, later in classification each segment could be mapped to a different cluster and hence the resulting classificiation can be either temporally split or made more robust but taking the most common label from each segment. This is what we end up doing. This will be very important later.
+
+
 # Mixture of Experts
 Given the features we have extracted, our aim is to use unsupervised learning for clustering the paths. The objective is to then utilize the trained model for clustering unknown samples as well as performing anomaly detection. In this section, we present our learning architecture based on a mixture of experts, which provides a more robust unsupervised learning approach compared to using a single architecture.
 
 # Dynamic Time Warping
-Before we proceed,
+
+Dynamic Time Warping (DTW) is a technique used to measure similarity between two temporal. For instance, in time series analysis, DTW can compare two sequences that may not align perfectly in time but nevertheless exibith similar traits (like going in a straight line or wobbling). In this case we use dynamic time warping to compute the distances between extracted paths.
+
+The algorithm works by finding the optimal allignemnt between two sequences. The pseudocode to calculate the distance between two time series A and B, both of length $n$ is:
+
+```python
+def dtw(A,B):
+  D = zeros(n, n)
+  for i in range(1, n+1):
+      for j in range(1, n+1):
+          cost = norm(A[i-1], B[j-1])
+          D[i,j] = cost + min(D[i-1, j], D[i, j-1], D[i-1, j-1])
+  return D[n, n]
+```
+
+where `norm` is simply the norm we prefer, in our case we consider the 2-norm. We found out that results are better if we take A and B to be either the X or the Y coordinates of a path. Hence the total distance between two paths is given by the sum of the DTW between the X coordinates and the Y coordinates. Note that this is consistent with the translation and rotation we perform at the beginning.
 
 # K-Means and K-Medoids
 We employ both the K-Means and K-Medoids unsupervised algorithms in our approach. The concept is straightforward: given data, we cluster it into $k$ different subgroups. Each group is characterized by a center, and each point is assigned to the center to which it is closest.
@@ -141,20 +164,18 @@ Based on the above, we train three different unsupervised learning algorithms:
 - K-Means on the x-axis of the data that is rotated using eigenvectors with the standard 2-norm.
 - K-Medoids on the translated and rotated data using Dynamic Time Warping.
 
-We then align the (arbitrary) labels of each method to minimize the elements which are labeled differently by the methods. The final result is:
+We then align the (arbitrary) labels of each method to minimize the elements which are labeled differently by the methods. The final centers are:
 
 ```
-Center Index Congruent Label:  1
-Mean Straight Line Velocity: 0.5817308225635153
-
-Center Index Congruent Label:  3
-Mean Straight Line Velocity: 2.2141501989892225
-
 Center Index Congruent Label:  2
-Mean Straight Line Velocity: 1.831724451074591
+Mean Straight Line Velocity: 1.8504304990846459
+
+Center Index Congruent Label:  1
+Mean Straight Line Velocity: 0.6805590579486639
 
 Center Index Congruent Label:  0
-Mean Straight Line Velocity: 1.1861126611941628
+Mean Straight Line Velocity: 1.8684070122829306
+
 ```
 
 Given a new path, we can classify it by comparing it to the computed centers for each method. This process is very fast, as we only need to compare the new path to the cluster centers as opposed to the whole database.
@@ -162,9 +183,33 @@ Given a new path, we can classify it by comparing it to the computed centers for
 We leverage the mixture of experts by assigning a path to the label to which it is most frequently assigned using a majority rule. Hence, we could say that each method "votes" on the class membership of a new path. Since each method considers different features, this makes the classification more robust to perturbations, errors in path extraction, and other potential anomalies.
 
 ## Anomaly Detection
-With the mixture of experts outlined above, implementing an anomaly detection algorithm for a new path is straightforward. A path is detected as 'anomalous' if it lies far from any of the cluster centers. Again, we employ a majority rule between the three experts, enhancing the robustness of our anomaly detection approach.
+With the mixture of experts outlined above, implementing an anomaly detection algorithm for a new path is straightforward. A path is detected as 'anomalous' if it lies far from any of the cluster centers. Again, we employ a majority rule among the three experts, enhancing the robustness of our anomaly detection approach.
 
 # Final Results
+
+The database, which was provided, is limited by the fact that there are no immobile cells tracked. Therefore, we focus our attention on classifying progressive and non-progressive cells. In theory, the best approach would be to use only 2 classes: one for progressive and the other for non-progressive cells. We found that empirically, using 3 classes provides better results. In particular, given the flaws of the tracking algorithm and the short segments, we found that the intermediary class is very helpful.
+
+In practice, all cells in the test and train datasets, when we take the most common label over the different segments, get classified either in group 1 (corresponding to non-progressive) or in group 2 (corresponding to progressive). In practice, our algorithm learns independently of the labels, and hence is much more robust. The fact that we are able to classify the groups from just a few examples is very promising. While group 3 (intermediate segment) is never used to classify a cell.
+
+Given that we interpret the groups this way, we achieve a 92.68% accuracy on the hand-labeled dataset. Below, we will review some of the mistakes and successes of our algorithm.
+
+## Successes
+Non-progressive cells:
+
+[VIDEO sample3_vid7_sperm21_id345 AND sample1_vid5_sperm15_id70]
+
+Progressive cells:
+
+[VIDEO sample3_vid1_sperm15_id409 AND sample3_vid5_sperm3_id256]
+
+## Errors and Anomalies
+These two cells were misclassified:
+
+[VIDEO sample1_vid1_sperm3_id3, sample3_vid2_sperm13_id81]
+
+This cell got flagged as anomalous as it was lying far away from the centers of two out of three experts:
+
+[VIDEO sample3_vid9_sperm16_id149]
 
 # Team
 Our team is made up of Mitja Devetak, Elene Lominadze, Ben Nicholls-Mindlin and Peter Waldert.
