@@ -12,6 +12,11 @@ import os
 import matplotlib.pyplot as plt
 from itertools import product, permutations
 import numpy as np
+import csv
+import warnings
+
+# ignore warnings
+warnings.filterwarnings("ignore")
 
 
 class MixtureOfExperts:
@@ -25,6 +30,7 @@ class MixtureOfExperts:
         # Assuming segment_paths, recenter_paths, rotate_paths, and set_final_point_on_x_axis_path are defined
         data_processed = segment_paths(self.data)
         self.length_paths = len(data_processed[0])
+        print("Length of the paths: ", self.length_paths)
         data_processed = recenter_paths(data_processed)
         data_rotated = rotate_paths(data_processed)
         data_final_point_on_x_axis = set_final_point_on_x_axis(data_rotated)
@@ -240,6 +246,7 @@ class MixtureOfExperts:
     def info(self):
         # print the centers of the clusters of model 2
         centers = self.model_2.cluster_centers_
+        size_of_clusters = [np.sum(self.model_2.labels_ == i) for i in range(len(centers))]
         # vcl = culvilinear_velocity(path)
         # vsl = straight_line_velocity(path)
         # vap = average_line_velocity(path)
@@ -250,6 +257,7 @@ class MixtureOfExperts:
         # mad = mean_angular_displacement(path)
         for i in range(len(centers)):
             print("Center Index Congruent Label: ", self.aligned_labels_2[i])
+            print("Size of cluster: ", size_of_clusters[i])
             print("vcl: ", centers[i][0])
             print("vsl: ", centers[i][1])
             print("vap: ", centers[i][2])
@@ -273,7 +281,7 @@ if __name__ == "__main__":
         data.append(path)
 
     print("Data loaded")
-    expert = MixtureOfExperts(data, debug=False, num_clusters=4, load_from_file=True)
+    expert = MixtureOfExperts(data, debug=False, num_clusters=3, load_from_file=True)
     print("Expert created")
     expert.train()
     print("Expert trained")
@@ -291,9 +299,50 @@ if __name__ == "__main__":
     print("Testing data loaded")
 
     i = 0
+    predictions = []
+    anomalies = []
     for path in data:
         i += 1
         prediction = expert.predict(path)
+        predictions.append(prediction)
         anomaly = expert.detect_anomaly(path, threshold=50)
+        anomalies.append(anomaly)
         print(f"For test sample {i} at {filenames[i - 1]}, prediction: {prediction}, anomaly: {anomaly}   ")
     print("Testing done")
+
+    # store in a csv table
+    with open("predictions.csv", "w", newline="") as file:
+        writer = csv.writer(file)
+        writer.writerow(["Filename", "Prediction", "Anomaly"])
+        for i in range(len(filenames)):
+            writer.writerow([filenames[i], predictions[i], anomalies[i]])
+
+    with open("../../data/path_extraction/ManualMotilityAnalysis.csv") as file:
+        reader = csv.reader(file)
+        next(reader)  # Skip the header row
+        classifcialtion = []
+        filenames_class = []
+        for row in reader:
+            classifcialtion.append(row[1])
+            filenames_class.append(row[0])
+
+    filenames = [filename.split(".")[0] for filename in filenames]
+
+    # get the indices of the filenames in the csv table
+    indices = [filenames_class.index(filename) for filename in filenames]
+    # get the classification of the files
+    classification = [classifcialtion[index] for index in indices]
+    # store a common csv table
+    with open("common.csv", "w", newline="") as file:
+        writer = csv.writer(file)
+        writer.writerow(["Filename", "Prediction", "Anomaly", "Classification"])
+        for i in range(len(filenames)):
+            writer.writerow([filenames[i], predictions[i], anomalies[i], classification[i]])
+
+    classification = [1 if classification[i] == "np" else 2 for i in range(len(classification))]
+
+    correct = 0
+    for i in range(len(filenames)):
+        if predictions[i] == classification[i]:
+            correct += 1
+    print(f"Accuracy: {correct / len(filenames)}")
