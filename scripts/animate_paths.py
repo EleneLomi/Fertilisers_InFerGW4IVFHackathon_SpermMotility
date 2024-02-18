@@ -9,11 +9,11 @@ import pymotility.path_extraction as pe
 def animate_paths():
     root = "/Users/benn-m/Documents/ivf_hackathon/SpermDB"
     vid_names = [
-        # "sample3_vid7_sperm21_id345",
-        # "sample1_vid5_sperm15_id70",
-        # "sample1_vid1_sperm3_id3",
-        # "sample3_vid2_sperm13_id81",
-        # "sample3_vid9_sperm16_id149",
+        "sample3_vid7_sperm21_id345",
+        "sample1_vid5_sperm15_id70",
+        "sample1_vid1_sperm3_id3",
+        "sample3_vid2_sperm13_id81",
+        "sample3_vid9_sperm16_id149",
         "sample3_vid1_sperm15_id409",
         "sample3_vid5_sperm3_id256",
     ]

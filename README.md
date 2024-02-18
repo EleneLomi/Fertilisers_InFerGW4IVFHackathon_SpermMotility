@@ -2,15 +2,14 @@
 
 This repository is a group entry to "Fertility: In Vitro, In Silico, In Clinico" hackathon.
 
-## <span style="color:blue">GOAL: We need to choose the project.</span>
+## SUMMARY: Automated Workflow to Aid in Sperm Selection from Video Data
 
 ## Table of Contents
 
 - [Fertilisers](#fertilisers)
-  - [GOAL: We need to choose the project.](#goal-we-need-to-choose-the-project)
+  - [SUMMARY: Automated Workflow to Aid in Sperm Selection from Video Data](#summary-automated-workflow-to-aid-in-sperm-selection-from-video-data)
   - [Table of Contents](#table-of-contents)
-- [Introduction](#introduction)
-- [Background](#background)
+- [Introduction and Background](#introduction-and-background)
 - [Overview](#overview)
 - [Path Extraction](#path-extraction)
   - [Motivation and Summary](#motivation-and-summary)
@@ -35,18 +34,15 @@ This repository is a group entry to "Fertility: In Vitro, In Silico, In Clinico"
 
 ---
 
-# Introduction
+# Introduction and Background
 
-(Elene: Need to edit)
-In the 1960s and 1970s, our understanding of the events in human oocyte fertilization grew to the point that in vitro fertilization (IVF) of human oocytes became possible. Ultimately, this knowledge led to the widely acclaimed first live birth of a “test tube baby,” Louise Brown, in England in 1978. Today, IVF accounts for millions of births worldwide and 1–3% of all births every year in the U.S. and Europe. The use of IVF has been on the rise recently, mostly as a result of deferred childbearing, and there is no reason to believe that this trend will alter. The focus of a great deal of research nowadays is to improve on the current ~30% success rate of IVF. Artificial intelligence and computational modelling have been gaining traction for their potential to improve outcomes for IVF. In this project, we try to use computational tools to improve fertility outcomes in the IVF clinic. Specifically, our objective is to develop tracking software to carry out real-time analysis of individual sperm cells, which would ultimately assist embryologists in selecting the better sperm for injection in IVF treatments.
-
-# Background
-
-Our objective was to conduct a temporal analysis of sperm movement patterns observed throughout the duration of the videos. This involved developing an algorithm to extract quantitative motility parameters from the videos, including velocity, straight-line distance and curvilinear distance.
-
-Furthermore, we aimed to classify sperm motility patterns using unsupervised machine learning techniques. We used a method of expert approach to cluster the data without using labels. We then labeled a few of the cells as either progressive or non-progressive in order to interpret the clusters. This approach gave us an accuracy of over 90%.
+In the 1960s and 1970s, our understanding of the events in human oocyte fertilization grew to the point that in vitro fertilization (IVF) of human oocytes became possible. Ultimately, this knowledge led to the widely acclaimed first live birth of a “test tube baby,” Louise Brown, in England in 1978. Today, IVF accounts for millions of births worldwide and 1–3% of all births every year in the U.S. and Europe. The use of IVF has been on the rise recently, mostly as a result of deferred childbearing, and there is no reason to believe that this trend will alter. The focus of a great deal of research nowadays is to improve on the current ~30% success rate of IVF. Artificial intelligence and computational modelling have been gaining traction for their potential to improve outcomes for IVF. In this project, we use computer vision and unsupervised learning tools to create an automated workflow which can quickly identify sperm motility patterns from video data of individual sperm, which could ultimately assist embryologists in selecting viable sperm for use in IVF treatments.
 
 # Overview
+
+Our objective was to conduct a temporal analysis of sperm movement patterns observed throughout the duration of the videos. To achieve this we developed an algorithm to extract path data a video dataset and calculated quantitative motility parameters such as the velocity, straight-line distance and curvilinear distance.
+
+We then used the raw path data and calculated motility parameters to classify sperm motility patterns using unsupervised machine learning techniques. More specifically, we employed a mixture of experts approach to cluster the data and identify anomalies, which was later evaluated against a hand labelled test data set and shown to have an accuracy of over 90%. Our methodology is summarised in Figure 1.
 
 <div>
 <div style="display:flex">
@@ -63,8 +59,6 @@ Furthermore, we aimed to classify sperm motility patterns using unsupervised mac
 The data provided for this challenge is pre-tracked videos from 2 sperm samples moving in vitro. To analyse the motion of the sperm we first need to extract the path the sperm takes from the videos. To do this we use the Lucas-Kanade method to estimate the background movement velocity at several "corner" points, take the average velocity after removing outliers, and use the average velocity to build up a path. We went on to validate this method qualitatively using overlaid path animations and quantiatively against hand tracked data, and saw high accuracy. The method is performant, running ~ 1 frame per 0.6ms, and so could easily be adapted to run with a live video stream in real time. Although the real world applicability of this path extraction method in the IVF setting may be slightly limited as it seems likely the system that initally tracked the sperm would record the path data as well, it is plausible that the path data may be lost in a data wipe or hard to accesss in propeitary software and a method such as this one would become necessary.
 
 ## Alogirithm and Implementation.
-
-<!-- include image here -->
 
 <div>
 <div style="display:flex">
@@ -122,8 +116,6 @@ The full implementation can be found in `pymotility/path_extraction/extract_path
 ## Benchmarking
 
 https://github.com/EleneLomi/Fertilisers/assets/79370760/a9a7a1d8-19c2-4a81-96b7-bd292e8c0c08
-
-
 
 ### Accuracy Against Hand Tracked Videos
 
@@ -259,21 +251,15 @@ These two cells were misclassified:
 
 <!-- [VIDEO sample1_vid1_sperm3_id3, sample3_vid2_sperm13_id81] -->
 
-
-
 https://github.com/EleneLomi/Fertilisers/assets/79370760/9e1c851d-5021-4b25-be9d-f5cf5853b2bc
 
 https://github.com/EleneLomi/Fertilisers/assets/79370760/1adf1ed2-57ea-45da-a52c-f7b0459894ba
-
-
 
 This cell got flagged as anomalous as it was lying far away from the centers of two out of three experts:
 
 <!-- [VIDEO sample3_vid9_sperm16_id149] -->
 
 https://github.com/EleneLomi/Fertilisers/assets/79370760/31e28795-c96b-4c95-82a3-80c9a68c829c
-
-
 
 # Team
 
