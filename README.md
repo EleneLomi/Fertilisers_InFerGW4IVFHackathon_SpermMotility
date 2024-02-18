@@ -14,7 +14,7 @@ This repository is a group entry to "Fertility: In Vitro, In Silico, In Clinico"
 - [Overview](#overview)
 - [Path Extraction](#path-extraction)
   - [Motivation and Summary](#motivation-and-summary)
-  - [Alogirithm and Implementation.](#alogirithm-and-implementation)
+  - [Algorithm and Implementation.](#algorithm-and-implementation)
   - [Benchmarking](#benchmarking)
     - [Accuracy Against Hand Tracked Videos](#accuracy-against-hand-tracked-videos)
     - [Performance](#performance)
@@ -37,7 +37,7 @@ This repository is a group entry to "Fertility: In Vitro, In Silico, In Clinico"
 
 # Introduction
 
- In the 1960s and 1970s, our understanding of the biology governing human fertilisation grew to the point that in vitro fertilisation (IVF) became possible in humans. This lead to the birth of the first “test tube baby”, Louise Brown, in England in 1978. Today, IVF accounts for 1–3% of all births every year in the U.S. and Europe, and millions of births worldwide. The use of IVF is still on the rise due to several factors including rising infertility rates and deferred childbearing, and this trend is likely to continue in the future. A great deal of research nowadays is focused on improving the success rate of IVF, which is currently ~30%. Artificial intelligence and computational modelling have been gaining traction for their potential to improve outcomes for IVF. In this project, we try to use computational tools to improve fertility outcomes in the IVF clinic. Specifically, our objective is to develop tracking software to carry out real-time analysis of individual sperm cells, which would ultimately assist embryologists in selecting the better sperm for injection in IVF treatments.
+ In the 1960s and 1970s, our understanding of the biology governing human fertilisation grew to the point that in vitro fertilisation (IVF) became possible in humans. This led to the birth of the first “test tube baby”, Louise Brown, in England in 1978. Today, IVF accounts for 1–3% of all births every year in the U.S. and Europe, and millions of births worldwide. The use of IVF is still on the rise due to several factors including rising infertility rates and deferred childbearing, and this trend is likely to continue in the future. A great deal of research nowadays is focused on improving the success rate of IVF, which is currently ~30%. Artificial intelligence and computational modelling have been gaining traction for their potential to improve outcomes for IVF. In this project, we try to use computational tools to improve fertility outcomes in the IVF clinic. Specifically, our objective is to develop tracking software to carry out real-time analysis of individual sperm cells, which would ultimately assist embryologists in selecting the better sperm for injection in IVF treatments.
 
 # Background
 
@@ -61,7 +61,7 @@ Furthermore, we aimed to classify sperm motility patterns using unsupervised mac
 
 The data provided for this challenge is pre-tracked videos from 2 sperm samples moving in vitro. To analyse the motion of the sperm we first need to extract the path the sperm takes from the videos. To do this we use the Lucas-Kanade method to estimate the background movement velocity at several "corner" points, take the average velocity after removing outliers, and use the average velocity to build up a path. We went on to validate this method qualitatively using overlaid path animations and quantiatively against hand tracked data, and saw high accuracy. The method is performant, running ~ 1 frame per 0.6ms, and so could easily be adapted to run with a live video stream in real time. Although the real world applicability of this path extraction method in the IVF setting may be slightly limited as it seems likely the system that initally tracked the sperm would record the path data as well, it is plausible that the path data may be lost in a data wipe or hard to accesss in propeitary software and a method such as this one would become necessary.
 
-## Alogirithm and Implementation.
+## Algorithm and Implementation.
 
 <!-- include image here -->
 
