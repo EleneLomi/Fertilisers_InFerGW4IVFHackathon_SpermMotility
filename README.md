@@ -6,7 +6,7 @@ This repository is a group entry to "Fertility: In Vitro, In Silico, In Clinico"
 
 # Overview
 
-Our objective was to conduct a temporal analysis of sperm movement patterns observed throughout the duration of the videos. To achieve this we developed an algorithm to extract path data a video dataset and calculated quantitative motility parameters such as the velocity, straight-line distance and curvilinear distance.
+Our objective was to conduct a temporal analysis of sperm movement patterns observed throughout the duration of the videos. To achieve this we developed an algorithm to extract path data from a video dataset and calculated quantitative motility parameters such as the velocity, straight-line distance and curvilinear distance.
 
 We then used the raw path data and calculated motility parameters to classify sperm motility patterns using unsupervised machine learning techniques. More specifically, we employed a mixture of experts approach to cluster the data and identify anomalies, which was later evaluated against a hand labelled test data set and shown to have an accuracy of over 90%. Our methodology is summarised in Figure 1.
 
@@ -33,6 +33,8 @@ The data provided for this challenge is pre-tracked videos from 2 sperm samples 
   </div>
 </div>
 <div style="text-align:center">Figure 2: The path extraction algorithm.</div>
+
+\
 To estimate the background velocity, we first have to choose good points in the image to track. This is achieved using the Shi-Tomasi corner detection alogorithm. Let $x,y$ decribe the coordinates of an abitrary pixel, $I(x,y)$ be the intensity of the pixel, and $w(x,y)$ be a weighting function. Corners are sharp maximisers of the following function:
 
 ```math
