@@ -63,7 +63,7 @@ I_x(\mathbf{x}_i) v_x+I_y(\mathbf{x}_i) v_y = - I_t(\mathbf{x}_i)
 where $I_x,I_y$ and $I_t$ are the image derivates with respect to $x,y$ and $t$ respectively. We can write this in matrix form as a least squares problem
 
 ```math
-\mathbf{v}^*=\min_{\mathbf{v}}A\mathbf{v}-\mathbf{b}
+\mathbf{v}^*=\min_{\mathbf{v}}||A\mathbf{v}-\mathbf{b}||_2
 ```
 
 where
