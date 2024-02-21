@@ -11,8 +11,11 @@ dependencies = [
   "matplotlib",
   "scikit-image",
   "scikit-video",
+  "scikit-learn",
+  "scikit-learn-extra",
   "opencv-python",
   "pandas",
+  "tslearn",
   "pytest",
 ]
 

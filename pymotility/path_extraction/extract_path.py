@@ -5,6 +5,7 @@ import numpy.linalg as la
 from skvideo.io import vread
 
 methods = ["lkof_framewise", "dof"]
+plt.style.use("ggplot")
 
 
 def grayscale_video(video):
@@ -101,9 +102,8 @@ def lkof_extract_path(video):
     return path
 
 
-def lkof_framewise_extract_path(video):
+def lkof_framewise_extract_path(video, show_outliers=False):
     T, N, M, _ = video.shape
-    bql = 0.1
     old_gray = cv2.cvtColor(video[0], cv2.COLOR_BGR2GRAY)
     ecr = exclude_center_roi(N // 10, N // 10, N, M)
     lk_params = dict(
@@ -117,7 +117,7 @@ def lkof_framewise_extract_path(video):
         points = cv2.goodFeaturesToTrack(
             old_gray,
             mask=ecr,
-            maxCorners=5,
+            maxCorners=20,
             qualityLevel=1e-2,
             minDistance=50,
         )
@@ -135,6 +135,57 @@ def lkof_framewise_extract_path(video):
             std = np.std(la.norm(centered, axis=0))
             inverse_covariance_matrix = np.eye(2) / std**2
         mahalanobis = np.array([np.sqrt(np.dot(dist, np.dot(inverse_covariance_matrix, dist))) for dist in centered])
+        thresh = 2
+        if np.any(mahalanobis > thresh) and show_outliers:
+            fig, ax = plt.subplots(1, 2)
+            fig.set_size_inches(10, 5)
+            fig.suptitle("Tracked Points")
+            ax[0].imshow(video[i - 1, :])
+            in_points = np.where(mahalanobis < thresh)
+            out_points = np.where(mahalanobis > thresh)
+            mean = np.mean(diffs[in_points], axis=0)
+            ax[0].quiver(
+                points[in_points, 0, 0],
+                points[in_points, 0, 1],
+                diffs[in_points, 0],
+                diffs[in_points, 1],
+                angles="xy",
+                scale_units="xy",
+                scale=0.05,
+                color="g",
+                label="Inliers",
+            )
+            ax[0].quiver(
+                points[out_points, 0, 0],
+                points[out_points, 0, 1],
+                diffs[out_points, 0],
+                diffs[out_points, 1],
+                angles="xy",
+                scale_units="xy",
+                scale=0.05,
+                color="r",
+                label="Outliers",
+            )
+            ax[0].quiver(
+                N // 2, M // 2, mean[0], mean[1], angles="xy", scale_units="xy", scale=0.05, color="k", label="Mean"
+            )
+            ax[0].legend()
+            ax[0].grid(False)
+            ax[0].axis("off")
+            ax[0].set_title("Optical Flow Vectors")
+            ax[1].set_title("Optical Flow Vectors")
+            s = ax[1].scatter(diffs[:, 0], -diffs[:, 1], c=mahalanobis, cmap="viridis")
+            colors = s.to_rgba(mahalanobis)
+            zs = np.zeros_like(diffs[:, 0])
+            q = ax[1].quiver(zs, zs, diffs[:, 0], -diffs[:, 1], color=colors, angles="xy", scale_units="xy", scale=1)
+            ax[1].quiver(0, 0, mean[0], -mean[1], color="k")
+            ax[1].axis("equal")
+            length = np.max(np.abs(diffs))
+            ax[1].set(xlim=(-length, length), ylim=(-length, length))
+            cb = plt.colorbar(s, ax=ax[1])
+            cb.set_label("Mahalanobis Distance")
+            plt.show()
+
         diffs = diffs[mahalanobis < 2]
         if np.all(np.isnan(diffs)):
             path[i + 1] = path[i]

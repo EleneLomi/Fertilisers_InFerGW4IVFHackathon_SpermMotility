@@ -14,19 +14,22 @@ from itertools import product, permutations
 import numpy as np
 import csv
 import warnings
+from datetime import datetime
 
 # ignore warnings
 warnings.filterwarnings("ignore")
 
 
 class MixtureOfExperts:
-    def __init__(self, data, debug=False, num_clusters=3, load_from_file=False):
+    def __init__(self, data, debug=False, num_clusters=3, distance_matrix_path=None, output_dir="data/clustering/"):
         self.data = data
         self.debug = debug
-        self.preprocess(debug, load_from_file=load_from_file)
+        self.distance_matrix_path = distance_matrix_path
+        self.preprocess(debug)
+        self.output_dir = output_dir
         self.initialize_models(num_clusters)
 
-    def preprocess(self, debug, load_from_file=False):
+    def preprocess(self, debug, output_dir="data/clustering/"):
         # Assuming segment_paths, recenter_paths, rotate_paths, and set_final_point_on_x_axis_path are defined
         data_processed = segment_paths(self.data)
         self.length_paths = len(data_processed[0])
@@ -38,13 +41,11 @@ class MixtureOfExperts:
             [path[:, 0] for path in data_rotated]  # Selects only the first coordinate, keeping the shape as (T, 1)
         )
         self.data_final_point_on_x_axis = data_final_point_on_x_axis
-        if load_from_file:
-            self.dist_matrix = np.loadtxt("distance_matrix.txt")
+        if self.distance_matrix_path is not None and os.path.exists(self.distance_matrix_path):
+            self.dist_matrix = np.loadtxt(self.distance_matrix_path)
         else:
             self.compute_distance_matrix(data_processed)
-            np.savetxt("distance_matrix.txt", self.dist_matrix, fmt="%d")
-        # store distance matrix in a txt file
-        # np.savetxt("distance_matrix.txt", self.dist_matrix, fmt="%d")
+            np.savetxt(f"{output_dir}/distance_matrix.txt", self.dist_matrix, fmt="%d")
         variables = compute_paths_variables(data_processed)
         variables = [np.array(path) for path in variables]
         self.variables = variables
@@ -270,18 +271,24 @@ class MixtureOfExperts:
 
 
 if __name__ == "__main__":
-    #  load all the files in "../../data/sample_1_paths/"
+    #  load all the files in "data/sample_1_paths/"
     #  and store them in the list "data"
+    current = datetime.now().strftime("%d-%m-%y_%H:%M:%S")
+    output_dir = f"data/clustering/{current}"
+    os.mkdir(output_dir)
     data = []
-    # for each file in the directory
-    for filename in os.listdir("../../data/training_data/train/"):
-        # load the file
-        path = np.load("../../data/training_data/train/" + filename)
-        # append the path to the data list
+    for filename in os.listdir("data/training_data/train/"):
+        path = np.load("data/training_data/train/" + filename)
         data.append(path)
 
     print("Data loaded")
-    expert = MixtureOfExperts(data, debug=False, num_clusters=3, load_from_file=True)
+    expert = MixtureOfExperts(
+        data,
+        debug=False,
+        num_clusters=3,
+        distance_matrix_path="data/clustering/distance_matrix.txt",
+        output_dir=output_dir,
+    )
     print("Expert created")
     expert.train()
     print("Expert trained")
@@ -289,10 +296,8 @@ if __name__ == "__main__":
 
     data = []
     filenames = []
-    for filename in os.listdir("../../data/training_data/test/"):
-        # load the file
-        path = np.load("../../data/training_data/test/" + filename)
-        # append the path to the data list
+    for filename in os.listdir("data/training_data/test/"):
+        path = np.load("data/training_data/test/" + filename)
         data.append(path)
         filenames.append(filename)
 
@@ -310,14 +315,13 @@ if __name__ == "__main__":
         print(f"For test sample {i} at {filenames[i - 1]}, prediction: {prediction}, anomaly: {anomaly}   ")
     print("Testing done")
 
-    # store in a csv table
-    with open("predictions.csv", "w", newline="") as file:
+    with open(f"{output_dir}/predictions.csv", "w", newline="") as file:
         writer = csv.writer(file)
         writer.writerow(["Filename", "Prediction", "Anomaly"])
         for i in range(len(filenames)):
             writer.writerow([filenames[i], predictions[i], anomalies[i]])
 
-    with open("../../data/path_extraction/ManualMotilityAnalysis.csv") as file:
+    with open("data/path_extraction/ManualMotilityAnalysis.csv") as file:
         reader = csv.reader(file)
         next(reader)  # Skip the header row
         classifcialtion = []
@@ -328,12 +332,9 @@ if __name__ == "__main__":
 
     filenames = [filename.split(".")[0] for filename in filenames]
 
-    # get the indices of the filenames in the csv table
     indices = [filenames_class.index(filename) for filename in filenames]
-    # get the classification of the files
     classification = [classifcialtion[index] for index in indices]
-    # store a common csv table
-    with open("common.csv", "w", newline="") as file:
+    with open(f"{output_dir}/common.csv", "w", newline="") as file:
         writer = csv.writer(file)
         writer.writerow(["Filename", "Prediction", "Anomaly", "Classification"])
         for i in range(len(filenames)):
