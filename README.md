@@ -228,4 +228,4 @@ We believe this is because it is moving much faster and straighter than the othe
 
 # Team
 
-Our team is made up of Mitja Devetak, Elene Lominadze, Ben Nicholls-Mindlin and Peter Waldert.
+Our team is made up of Mitja Devetak (Centre d'economie de la Sorbonne), Elene Lominadze, Ben Nicholls-Mindlin and Peter Waldert.
